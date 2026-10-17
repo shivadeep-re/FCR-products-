@@ -1,0 +1,7 @@
+# Raw Fingrid data is large (~860 MB/month); download it yourself (see README)
+data/*
+!data/README.md
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
