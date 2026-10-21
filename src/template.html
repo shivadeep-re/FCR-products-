@@ -4,23 +4,26 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /*UPLOT_CSS*/
-/* Layout: one operator-console column; battery + product setup, key figures, then stacked panels sharing one time axis */
+/* Layout: one operator-console column; data + battery + product setup, key figures, then stacked panels sharing one time axis */
 :root{
   --bg:#f5f7f8; --panel:#ffffff; --fg:#14212b; --muted:#5b6b76; --line:#d9e0e4;
-  --dis:#c2410c; --chg:#0e6ba8; --trace:#1f3a4d; --freq:#6d28d9; --soc:#047857; --nem:#c0267a; --fcrd:#d97706; --band:#9aa9b3;
+  --dis:#c2410c; --chg:#0e6ba8; --trace:#1f3a4d; --freq:#6d28d9; --soc:#047857; --nem:#c0267a; --fcrd:#d97706; --fcrn:#0891b2; --loss:#64748b; --band:#9aa9b3;
   --empty:rgba(194,65,12,.10); --full:rgba(14,107,168,.10); --aem:rgba(192,38,122,.12);
+  --zn:rgba(8,145,178,.07); --zd:rgba(217,119,6,.08);
   --ok:#047857; --warn:#b45309;
   --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0f161b; --panel:#162028; --fg:#e4ebef; --muted:#93a3ad; --line:#26343e;
-  --dis:#fb923c; --chg:#5cb8f0; --trace:#cfdde6; --freq:#b79cf7; --soc:#4ade9b; --nem:#f472b6; --fcrd:#fcd34d; --band:#5d6e79;
-  --empty:rgba(251,146,60,.14); --full:rgba(92,184,240,.14); --aem:rgba(244,114,182,.16); --ok:#4ade9b; --warn:#fbbf24; color-scheme:dark}}
+  --dis:#fb923c; --chg:#5cb8f0; --trace:#cfdde6; --freq:#b79cf7; --soc:#4ade9b; --nem:#f472b6; --fcrd:#fcd34d; --fcrn:#22d3ee; --loss:#94a3b8; --band:#5d6e79;
+  --empty:rgba(251,146,60,.14); --full:rgba(92,184,240,.14); --aem:rgba(244,114,182,.16);
+  --zn:rgba(34,211,238,.07); --zd:rgba(252,211,77,.08); --ok:#4ade9b; --warn:#fbbf24; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0f161b; --panel:#162028; --fg:#e4ebef; --muted:#93a3ad; --line:#26343e;
-  --dis:#fb923c; --chg:#5cb8f0; --trace:#cfdde6; --freq:#b79cf7; --soc:#4ade9b; --nem:#f472b6; --fcrd:#fcd34d; --band:#5d6e79;
-  --empty:rgba(251,146,60,.14); --full:rgba(92,184,240,.14); --aem:rgba(244,114,182,.16); --ok:#4ade9b; --warn:#fbbf24; color-scheme:dark}
+  --dis:#fb923c; --chg:#5cb8f0; --trace:#cfdde6; --freq:#b79cf7; --soc:#4ade9b; --nem:#f472b6; --fcrd:#fcd34d; --fcrn:#22d3ee; --loss:#94a3b8; --band:#5d6e79;
+  --empty:rgba(251,146,60,.14); --full:rgba(92,184,240,.14); --aem:rgba(244,114,182,.16);
+  --zn:rgba(34,211,238,.07); --zd:rgba(252,211,77,.08); --ok:#4ade9b; --warn:#fbbf24; color-scheme:dark}
 html,body{background:var(--bg);color:var(--fg)}
 body{font-family:var(--sans);font-size:15px;line-height:1.5;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 32px}
@@ -32,13 +35,14 @@ h1{font-size:1.45rem;font-weight:600;margin:0;text-wrap:balance;letter-spacing:-
 .stat b{font-family:var(--mono);font-weight:500;font-size:1.15rem}
 .stat span{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px;display:grid;gap:14px;min-width:0}
-.setup .row{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:flex-end}
-.setup h2{font:600 .78rem var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0}
+.row{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:flex-end}
+.panel h2.t{font:600 .78rem var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0}
 .grp{display:grid;gap:8px;padding-top:12px;border-top:1px solid var(--line)}
 .fld{display:grid;gap:3px}
-.fld label{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.fld label,.fld .l{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .fld .in{display:flex;align-items:center;border:1px solid var(--line);border-radius:4px;background:var(--bg)}
 .fld input{font:500 1rem var(--mono);color:var(--fg);background:transparent;border:0;width:7.5ch;padding:6px 4px 6px 10px;font-variant-numeric:tabular-nums}
+.fld input.txt{font:500 .9rem var(--sans);width:16ch}
 .fld input:focus-visible{outline:none}
 .fld .in:focus-within{outline:2px solid var(--chg);outline-offset:1px}
 .fld.off{opacity:.45}
@@ -50,30 +54,36 @@ h1{font-size:1.45rem;font-weight:600;margin:0;text-wrap:balance;letter-spacing:-
 .split{display:grid;gap:4px;min-width:min(100%,360px);flex:1 1 360px}
 .split .ends{display:flex;justify-content:space-between;font:500 .82rem var(--mono);font-variant-numeric:tabular-nums}
 .split input[type=range]{width:100%;accent-color:var(--fcrd)}
-.split .hint{font-size:.78rem;color:var(--muted)}
+.hint{font-size:.78rem;color:var(--muted)}
 .check{font:.82rem var(--mono);display:grid;gap:2px;color:var(--muted)}
 .check .ok{color:var(--ok)} .check .bad{color:var(--warn)}
 .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .lab{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-button,select{font:500 .85rem var(--sans);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:6px 10px;cursor:pointer}
-button[data-w][aria-pressed="true"],button.em[aria-pressed="true"]{background:var(--trace);color:var(--panel);border-color:var(--trace)}
+button,select,.filebtn{font:500 .85rem var(--sans);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:6px 10px;cursor:pointer}
+button:disabled,select:disabled{opacity:.5;cursor:default}
+.filebtn{display:inline-flex;align-items:center}
+.filebtn input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.filebtn:focus-within{outline:2px solid var(--chg);outline-offset:1px}
+button.pri{background:var(--trace);color:var(--panel);border-color:var(--trace)}
+button[data-w][aria-pressed="true"],button.em[aria-pressed="true"],button.seg[aria-pressed="true"]{background:var(--trace);color:var(--panel);border-color:var(--trace)}
 button.tog{display:inline-flex;align-items:center;gap:7px}
 button.tog i{width:12px;height:3px;border-radius:2px;background:var(--c)}
+button.tog i.box{height:10px}
 button.tog[aria-pressed="false"]{color:var(--muted);text-decoration:line-through}
 button.tog[aria-pressed="false"] i{opacity:.3}
+button.tog.sm{font-size:.78rem;padding:3px 8px}
 button:focus-visible,select:focus-visible,.prod input:focus-visible,input[type=range]:focus-visible{outline:2px solid var(--chg);outline-offset:1px}
 .sep{width:1px;height:22px;background:var(--line)}
 .readout{font-family:var(--mono);font-size:.85rem;font-variant-numeric:tabular-nums;display:flex;flex-wrap:wrap;gap:4px 18px;min-height:1.4em}
 .readout .k{color:var(--muted)}
-.dis{color:var(--dis)} .chg{color:var(--chg)} .fq{color:var(--freq)} .sc{color:var(--soc)} .nm{color:var(--nem)} .fd{color:var(--fcrd)}
+.dis{color:var(--dis)} .chg{color:var(--chg)} .fq{color:var(--freq)} .sc{color:var(--soc)} .nm{color:var(--nem)} .fd{color:var(--fcrd)} .fn{color:var(--fcrn)} .ls{color:var(--loss)}
 .pill{font:600 .7rem var(--sans);letter-spacing:.05em;text-transform:uppercase;border-radius:3px;padding:1px 6px;background:var(--aem);color:var(--nem)}
-.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.8rem;color:var(--muted)}
-.legend span{display:inline-flex;align-items:center;gap:6px}
-.legend i{width:14px;height:10px;border-radius:2px;background:var(--c)}
-.legend i.ln{height:3px}
+.status{font:.82rem var(--mono);color:var(--muted);min-height:1.3em}
+.status.err{color:var(--warn)} .status.good{color:var(--ok)}
 .charts{display:grid;gap:4px;min-width:0}
-.ch{min-width:0}
-.ch h2{font:500 .74rem var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:6px 0 0 52px}
+.ch{min-width:0;display:grid;gap:4px}
+.ch .hd{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-left:52px}
+.ch h2{font:500 .74rem var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:6px 0 0}
 .u-legend{display:none}
 .uplot{font-family:var(--mono)}
 .u-select{background:color-mix(in srgb,var(--chg) 18%,transparent)}
@@ -81,15 +91,48 @@ button:focus-visible,select:focus-visible,.prod input:focus-visible,input[type=r
 .rules h3{font-size:.95rem;margin:8px 0 0}
 .rules ul{margin:0;padding-left:18px;color:var(--muted);font-size:.88rem;display:grid;gap:3px}
 .note{font-size:.82rem;color:var(--muted);max-width:82ch;margin:0}
-.note a{color:var(--chg)}
+.note a,.hint a{color:var(--chg)}
 #loading{font-family:var(--mono);color:var(--muted);padding:40px 0;text-align:center}
 </style>
 <main>
   <header>
-    <h1>Battery on FCR&#8209;N and FCR&#8209;D, __DATE_LONG__</h1>
-    <p class="sub">Every 0.1 s sample, 864,000 points, with Nordic LER energy management (NEM and AEM). Run FCR-N, FCR-D or both on one battery and split its power between them. Positive power is <span class="dis">discharging</span>, negative is <span class="chg">charging</span>.</p>
+    <h1>Battery on FCR&#8209;N and FCR&#8209;D, <span id="day-long">__DATE_LONG__</span></h1>
+    <p class="sub">Every 0.1 s sample, 864,000 points a day, with Nordic LER energy management (NEM and AEM). Load your own Fingrid days, run FCR-N, FCR-D or both, split battery power between them, and export the results. Positive power is <span class="dis">discharging</span>, negative is <span class="chg">charging</span>.</p>
   </header>
-  <section class="panel setup" aria-label="Battery and product setup">
+
+  <section class="panel" aria-label="Data, scenarios and export">
+    <div class="row">
+      <div class="fld"><label for="day">Day</label><select id="day"></select></div>
+      <label class="filebtn" for="files">Load Fingrid CSV files…<input type="file" id="files" accept=".csv,text/csv" multiple></label>
+      <span class="hint">Fingrid dataset 339 (<a href="https://data.fingrid.fi/en/datasets/339" target="_blank" rel="noopener">frequency, 0.1 s</a>), one CSV per day. Unzip the monthly .7z first. Files are read in your browser and are not uploaded anywhere.</span>
+    </div>
+    <div class="status" id="load-status" role="status" aria-live="polite"></div>
+    <div class="grp">
+      <h2 class="t">Scenarios</h2>
+      <div class="row">
+        <div class="fld"><label for="sc-name">Name</label><div class="in"><input class="txt" id="sc-name" type="text" maxlength="60" placeholder="e.g. 70/30 split"></div></div>
+        <button id="sc-save">Save scenario</button>
+        <div class="fld"><label for="sc-list">Saved</label><select id="sc-list"></select></div>
+        <button id="sc-load">Load</button>
+        <button id="sc-del">Delete</button>
+        <label class="filebtn" for="sc-import">Import settings (.json)…<input type="file" id="sc-import" accept=".json,application/json"></label>
+      </div>
+      <span class="hint">Saved scenarios stay in this browser. Export them as .json to share or keep elsewhere.</span>
+    </div>
+    <div class="grp">
+      <h2 class="t">Export</h2>
+      <div class="row">
+        <div class="controls"><span class="lab">Resolution</span>
+          <button class="seg" data-res="10" aria-pressed="true">1 s (86,400 rows)</button>
+          <button class="seg" data-res="1" aria-pressed="false">0.1 s (864,000 rows)</button></div>
+        <button class="pri" id="ex-csv">Export results (.csv)</button>
+        <button id="ex-json">Export summary + settings (.json)</button>
+      </div>
+    </div>
+    <div class="status" id="io-status" role="status" aria-live="polite"></div>
+  </section>
+
+  <section class="panel" aria-label="Battery and product setup">
     <div class="row">
       <div class="fld"><label for="in-p">Battery power</label><div class="in"><input id="in-p" type="number" inputmode="decimal" min="0.1" max="100" step="0.1" value="1"><span class="u">MW</span></div></div>
       <div class="fld"><label for="in-e">Battery energy</label><div class="in"><input id="in-e" type="number" inputmode="decimal" min="0.1" max="400" step="0.1" value="2"><span class="u">MWh</span></div></div>
@@ -97,9 +140,9 @@ button:focus-visible,select:focus-visible,.prod input:focus-visible,input[type=r
       <div class="fld"><label for="in-eta">Round-trip eff.</label><div class="in"><input id="in-eta" type="number" inputmode="decimal" min="50" max="100" step="1" value="90"><span class="u">%</span></div></div>
     </div>
     <div class="grp">
-      <h2>Products</h2>
+      <h2 class="t">Products</h2>
       <div class="prod">
-        <label style="--c:var(--trace)"><input type="checkbox" id="use-n" checked>FCR-N</label>
+        <label style="--c:var(--fcrn)"><input type="checkbox" id="use-n" checked>FCR-N</label>
         <label style="--c:var(--fcrd)"><input type="checkbox" id="use-du" checked>FCR-D up</label>
         <label style="--c:var(--fcrd)"><input type="checkbox" id="use-dd" checked>FCR-D down</label>
       </div>
@@ -126,11 +169,16 @@ button:focus-visible,select:focus-visible,.prod input:focus-visible,input[type=r
       <div class="check" id="check"></div>
     </div>
   </section>
+
   <div class="stats">
     <div class="stat"><b id="st-thr"></b><span>Battery throughput</span></div>
-    <div class="stat"><b id="st-n"></b><span>FCR-N response</span></div>
+    <div class="stat"><b class="fn" id="st-n"></b><span>FCR-N response</span></div>
     <div class="stat"><b class="fd" id="st-d"></b><span>FCR-D response</span></div>
     <div class="stat"><b class="nm" id="st-ne"></b><span>NEM correction</span></div>
+    <div class="stat"><b class="fn" id="st-sn"></b><span>SOC used by FCR-N</span></div>
+    <div class="stat"><b class="fd" id="st-sd"></b><span>SOC used by FCR-D</span></div>
+    <div class="stat"><b class="nm" id="st-sm"></b><span>SOC from NEM</span></div>
+    <div class="stat"><b class="ls" id="st-sl"></b><span>Losses &amp; limits</span></div>
     <div class="stat"><b id="st-cyc"></b><span>Full cycles</span></div>
     <div class="stat"><b class="fd" id="st-dact"></b><span>FCR-D activated</span></div>
     <div class="stat"><b class="nm" id="st-nem"></b><span>NEM active</span></div>
@@ -140,6 +188,7 @@ button:focus-visible,select:focus-visible,.prod input:focus-visible,input[type=r
     <div class="stat"><b id="st-min"></b><span>SOC range</span></div>
     <div class="stat"><b id="st-end"></b><span>SOC at midnight</span></div>
   </div>
+
   <section class="panel">
     <div class="controls">
       <span class="lab">Show</span>
@@ -161,27 +210,35 @@ button:focus-visible,select:focus-visible,.prod input:focus-visible,input[type=r
       <span class="sep"></span>
       <button id="jumpd" title="Jump to the largest FCR-D activation">Largest FCR-D event</button>
     </div>
-    <div class="legend">
-      <span><i class="ln" style="--c:var(--trace)"></i>Battery power (total)</span>
-      <span><i class="ln" style="--c:var(--fcrd)"></i>FCR-D part</span>
-      <span><i class="ln" style="--c:var(--nem)"></i>NEM part</span>
-      <span><i style="--c:var(--aem)"></i>AEM</span>
-      <span><i style="--c:var(--empty)"></i>Empty</span>
-      <span><i style="--c:var(--full)"></i>Full</span>
-    </div>
-    <div class="readout" id="readout"><span class="k">Hover or touch a trace for values. Drag to zoom on desktop.</span></div>
+    <div class="readout" id="readout"><span class="k">Hover or touch a trace for values. Drag to zoom on desktop. Tap a line name to hide or show it.</span></div>
     <div class="charts">
-      <div class="ch" id="w-p"><h2 id="h-p">Power, MW</h2><div id="c-p"><div id="loading">Decoding 864,000 samples…</div></div></div>
-      <div class="ch" id="w-f"><h2>Frequency, Hz</h2><div id="c-f"></div></div>
-      <div class="ch" id="w-s"><h2 id="h-s">State of charge, %</h2><div id="c-s"></div></div>
+      <div class="ch" id="w-p"><div class="hd"><h2 id="h-p">Power, MW</h2>
+        <button class="tog sm" data-s="p:1" aria-pressed="true" style="--c:var(--trace)"><i></i>Total</button>
+        <button class="tog sm" data-s="p:2" aria-pressed="true" style="--c:var(--fcrn)"><i></i>FCR-N</button>
+        <button class="tog sm" data-s="p:3" aria-pressed="true" style="--c:var(--fcrd)"><i></i>FCR-D</button>
+        <button class="tog sm" data-s="p:4" aria-pressed="true" style="--c:var(--nem)"><i></i>NEM</button></div>
+        <div id="c-p"><div id="loading">Decoding 864,000 samples…</div></div></div>
+      <div class="ch" id="w-f"><div class="hd"><h2>Frequency, Hz</h2>
+        <button class="tog sm" id="frange" aria-pressed="false" style="--c:var(--fcrd)"><i class="box"></i>Full FCR-D range</button></div>
+        <div id="c-f"></div></div>
+      <div class="ch" id="w-s"><div class="hd"><h2 id="h-s">State of charge, %</h2>
+        <button class="tog sm" data-s="s:1" aria-pressed="true" style="--c:var(--soc)"><i></i>SOC</button>
+        <button class="tog sm" data-s="s:2" aria-pressed="true" style="--c:var(--fcrn)"><i></i>Used by FCR-N</button>
+        <button class="tog sm" data-s="s:3" aria-pressed="true" style="--c:var(--fcrd)"><i></i>Used by FCR-D</button>
+        <button class="tog sm" data-s="s:4" aria-pressed="true" style="--c:var(--nem)"><i></i>From NEM</button>
+        <button class="tog sm" data-s="s:5" aria-pressed="true" style="--c:var(--loss)"><i></i>Losses &amp; limits</button></div>
+        <div id="c-s"></div></div>
     </div>
+    <p class="hint">Power: shaded bands mark AEM (pink), empty (orange) and full (blue). Frequency: the teal zone is FCR-N's active band and the amber zones are where FCR-D responds. SOC: the left axis is the battery's SOC; the right axis shows how many SOC points each product has moved since midnight (below zero = drained, above = charged).</p>
   </section>
+
   <section class="rules">
     <h3>Products</h3>
     <ul>
       <li><b>FCR-N</b>: P = C<sub>N</sub> × (50 − f) / 0.1 Hz, limited to ±C<sub>N</sub>. Linear, full output at 49.9 and 50.1 Hz, no deadband.</li>
       <li><b>FCR-D up</b>: discharges below 49.9 Hz, rising linearly to full C<sub>D↑</sub> at 49.5 Hz. <b>FCR-D down</b>: charges above 50.1 Hz, rising linearly to full C<sub>D↓</sub> at 50.5 Hz. Modelled as a static response, without the dynamic ramp-up of the real requirement.</li>
-      <li>When products run together their responses are added and the total is limited by the battery's rated power. The response figures above are each product's own energy (charge plus discharge); they can add up to more than the battery throughput because NEM and FCR-N partly cancel out.</li>
+      <li>When products run together their responses are added and the total is limited by the battery's rated power. The response figures are each product's own energy (charge plus discharge); they can add up to more than the battery throughput because NEM and FCR-N partly cancel out.</li>
+      <li><b>SOC used by each product</b> is its net energy since midnight as a share of battery capacity, without losses. Losses &amp; limits is what remains: conversion losses, plus any response the battery could not deliver because it was empty or full.</li>
     </ul>
     <h3>Sizing check</h3>
     <ul>
@@ -195,34 +252,83 @@ button:focus-visible,select:focus-visible,.prod input:focus-visible,input[type=r
       <li><b>AEM</b>, per product: on at 5 min or less left, at any frequency, and off above 10 min. The product then responds around the 5-minute average frequency instead of 50 Hz and counts as unavailable. NEM keeps running alongside.</li>
     </ul>
   </section>
-  <p class="note">Sources: ENTSO-E, <a href="https://www.statnett.no/link/fe89e089e1fd4154947ca28e6ea8c3fc.aspx" target="_blank" rel="noopener">Technical Requirements for FCR Provision in the Nordic Synchronous Area v1.1</a> (28 Mar 2025), section 3.5 and Table 10; Energinet, <a href="https://en.energinet.dk/media/r4rbirq2/prequalfication-of-fcr-n-and-fcr-d.pdf" target="_blank" rel="noopener">Prequalification of FCR-N and FCR-D</a> (NEM and AEM thresholds, power shares and energy reservations). Frequency: Fingrid 0.1 s data, file __DATE_ISO__, times as given in the file. SOC is limited to 0–100 %, and losses are split evenly between charging and discharging. Hourly bid changes are not modelled.</p>
+  <p class="note">Sources: ENTSO-E, <a href="https://www.statnett.no/link/fe89e089e1fd4154947ca28e6ea8c3fc.aspx" target="_blank" rel="noopener">Technical Requirements for FCR Provision in the Nordic Synchronous Area v1.1</a> (28 Mar 2025), section 3.5 and Table 10; Energinet, <a href="https://en.energinet.dk/media/r4rbirq2/prequalfication-of-fcr-n-and-fcr-d.pdf" target="_blank" rel="noopener">Prequalification of FCR-N and FCR-D</a> (NEM and AEM thresholds, power shares and energy reservations). Frequency: Fingrid 0.1 s data, times as given in the file (built-in day: <span id="day-iso">__DATE_ISO__</span>). Values outside 49–51 Hz and single-sample spikes are removed and gaps filled with the previous value. SOC is limited to 0–100 %, and losses are split evenly between charging and discharging. Hourly bid changes are not modelled.</p>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/uplot@1.6.30/dist/uPlot.iife.min.js"></script>
 <script>
 (function(){
-const B64="__DATA__";
-const bin=atob(B64), n=bin.length/2, buf=new ArrayBuffer(bin.length), u8=new Uint8Array(buf);
-for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
-const q=new Int16Array(buf);
-const x=new Float64Array(n), fr=new Float32Array(n), p=new Float32Array(n), pd=new Float32Array(n), pn=new Float32Array(n), soc=new Float32Array(n), aemF=new Uint8Array(n);
-let fminI=0;
-for(let i=0;i<n;i++){x[i]=i/10;fr[i]=50+q[i]/1e5;if(fr[i]<fr[fminI])fminI=i;}
-let fmaxI=0;for(let i=0;i<n;i++)if(fr[i]>fr[fmaxI])fmaxI=i;
-const DT=0.1/3600; let empty=[],full=[],aemB=[],emOn=true;
+const n=864000, DT=0.1/3600;
 const $=id=>document.getElementById(id);
+/* ---------- data: built-in day + loaded files ---------- */
+const days=new Map(); // iso -> {f:Float32Array, label, src}
+(function(){const B64="__DATA__";const bin=atob(B64),buf=new ArrayBuffer(bin.length),u8=new Uint8Array(buf);
+  for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);const q=new Int16Array(buf),f=new Float32Array(n);
+  for(let i=0;i<n;i++)f[i]=50+q[i]/1e5;days.set('__DATE_ISO__',{f,src:'built-in'})})();
+const longDate=iso=>{const d=new Date(iso+'T12:00:00Z');return d.getUTCDate()+' '+d.toLocaleString('en-GB',{month:'long',timeZone:'UTC'})+' '+d.getUTCFullYear()};
+let curDay='__DATE_ISO__';
+const x=new Float64Array(n);for(let i=0;i<n;i++)x[i]=i/10;
+let fr=days.get(curDay).f, fminI=0, fmaxI=0;
+const p=new Float32Array(n), pnN=new Float32Array(n), pd=new Float32Array(n), pn=new Float32Array(n), soc=new Float32Array(n), aemF=new Uint8Array(n);
+const dsN=new Float32Array(n), dsD=new Float32Array(n), dsM=new Float32Array(n), dsL=new Float32Array(n);
+function scanF(){fminI=0;fmaxI=0;for(let i=1;i<n;i++){if(fr[i]<fr[fminI])fminI=i;if(fr[i]>fr[fmaxI])fmaxI=i;}}
+scanF();
+/* Parse one Fingrid CSV ("Time,Value"; "YYYY-MM-DD HH:MM:SS.fff,49.98") with the same cleaning as scripts/build_site.py */
+function parseFingrid(text){
+  let date=null;const idx=[],val=[];let pos=0;const L=text.length;
+  while(pos<L){let e=text.indexOf('\n',pos);if(e<0)e=L;const line=text.slice(pos,e);pos=e+1;
+    if(line.length<20||line.charCodeAt(0)<48||line.charCodeAt(0)>57)continue;
+    const c=line.indexOf(',');if(c<0)continue;
+    const d=line.slice(0,10);if(!date)date=d;else if(d!==date)continue;
+    const hh=+line.slice(11,13),mm=+line.slice(14,16),ss=+line.slice(17,19);
+    let ms=0;if(line.charAt(19)==='.')ms=+line.slice(20,c);
+    const v=parseFloat(line.slice(c+1));
+    if(!isFinite(v)||!isFinite(hh)||v<=49||v>=51)continue;
+    const k=(hh*3600+mm*60+ss)*10+Math.round(ms/100);if(k<0||k>=n)continue;
+    idx.push(k);val.push(v);}
+  if(!date||!/^\d{4}-\d{2}-\d{2}$/.test(date))throw new Error('no Fingrid rows found (expected "Time,Value" with 0.1 s timestamps)');
+  if(idx.length<n*0.5)throw new Error('only '+idx.length.toLocaleString()+' valid samples, too much data missing');
+  // drop single-sample spikes: > 50 mHz from a centred 9-sample median
+  const m=idx.length,keep=new Uint8Array(m),w=new Float64Array(9);
+  for(let i=0;i<m;i++){const a=Math.max(0,i-4),b=Math.min(m-1,i+4);let c2=0;
+    for(let j=a;j<=b;j++){const v=val[j];let t=c2++;while(t>0&&w[t-1]>v){w[t]=w[t-1];t--}w[t]=v}
+    const med=c2%2?w[(c2-1)/2]:(w[c2/2-1]+w[c2/2])/2;keep[i]=Math.abs(val[i]-med)<0.05?1:0}
+  const f=new Float32Array(n).fill(NaN);let kept=0;
+  for(let i=0;i<m;i++)if(keep[i]){f[idx[i]]=val[i];kept++}
+  let first=50;for(let i=0;i<n;i++)if(!isNaN(f[i])){first=f[i];break}
+  let last=first;for(let i=0;i<n;i++){if(isNaN(f[i]))f[i]=last;else last=f[i]}
+  return {date,f,kept};
+}
+function fillDays(){const s=$('day');s.innerHTML='';[...days.keys()].sort().forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=longDate(k)+(days.get(k).src==='built-in'?' (built-in)':'');s.appendChild(o)});s.value=curDay}
+function setDay(iso){curDay=iso;fr=days.get(iso).f;scanF();$('day-long').textContent=longDate(iso);fillDays();redo()}
+const ls=$('load-status');
+$('files').addEventListener('change',async ev=>{
+  const list=[...ev.target.files];if(!list.length)return;ls.className='status';
+  let ok=0,bad=[],lastIso=null;
+  for(const file of list){ls.textContent='Reading '+file.name+'…';await new Promise(r=>setTimeout(r,0));
+    try{const r=parseFingrid(await file.text());days.set(r.date,{f:r.f,src:file.name});ok++;lastIso=r.date;}
+    catch(e){bad.push(file.name+': '+e.message)}}
+  ev.target.value='';
+  if(lastIso)setDay(lastIso);
+  ls.className='status '+(bad.length?'err':'good');
+  ls.textContent=(ok?'Loaded '+ok+' day'+(ok>1?'s':'')+'. Pick one in Day. ':'')+(bad.length?'Could not read '+bad.join('; '):'')+(ok?' Loaded days last until you close this page.':'');
+});
+$('day').addEventListener('change',e=>setDay(e.target.value));
+/* ---------- model ---------- */
+let empty=[],full=[],aemB=[],emOn=true,stats={};
 const num=(id,lo,hi,def)=>{const v=parseFloat($(id).value);return isFinite(v)?Math.min(hi,Math.max(lo,v)):def};
 const hrs=s=>s<36?'0 h':(s/3600<10?(s/3600).toFixed(1):Math.round(s/3600))+' h';
 const dur=s=>s<60?Math.round(s)+' s':s<3600?(s/60).toFixed(1)+' min':(s/3600).toFixed(1)+' h';
 const mwh=v=>v<0.1?(v*1000).toFixed(v<0.01?1:0)+' kWh':v.toFixed(2)+' MWh';
+const pts=v=>Math.abs(v)<0.05?'0.0 pts':(v>0?'+':'')+(Math.abs(v)<10?v.toFixed(1):Math.round(v))+' pts';
 const SPEC={
   p:{color:'--trace',range:[-1.1,1.1],splits:[-1,-0.5,0,0.5,1],fmt:v=>v.toFixed(1),lines:[1,0,-1],h:1},
-  f:{color:'--freq',range:[49.84,50.16],splits:[49.85,49.9,49.95,50,50.05,50.1,50.15],fmt:v=>v.toFixed(2),lines:[50.1,50,49.9],h:.75},
-  s:{color:'--soc',range:[-4,104],splits:[0,25,50,75,100],fmt:v=>v.toFixed(0),lines:[100,50,0],h:.75}
+  f:{color:'--freq',range:[49.84,50.16],splits:[49.85,49.9,49.95,50,50.05,50.1,50.15],fmt:v=>v.toFixed(2),lines:[],h:.8},
+  s:{color:'--soc',range:[-4,104],splits:[0,25,50,75,100],fmt:v=>v.toFixed(0),lines:[100,50,0],h:.85,drange:[-10,10]}
 };
+let fullRange=false;
 function bands(flag){const out=[];let s=-1;for(let i=0;i<n;i++){if(flag(i)){if(s<0)s=i}else if(s>=0){out.push([s/10,i/10]);s=-1}}if(s>=0)out.push([s/10,n/10]);return out}
 const use=()=>({N:$('use-n').checked,Du:$('use-du').checked,Dd:$('use-dd').checked});
 function caps(){const u=use();return{CN:u.N?num('in-cn',0,100,0):0,CDu:u.Du?num('in-cdu',0,100,0):0,CDd:u.Dd?num('in-cdd',0,100,0):0}}
-/* Fill capacities from the split slider: most each product can bid with its share of power, then scaled to fit energy */
 function applySplit(){
   const u=use(),P=num('in-p',0.1,100,1),CAP=num('in-e',0.1,400,2);
   let s=num('split',0,100,50)/100;
@@ -232,7 +338,6 @@ function applySplit(){
   let CN=u.N?s*P/1.34:0;
   const both=u.Du&&u.Dd, PD=(1-s)*P;
   let CD=anyD?PD/(both?1.2:1):0;
-  // power check in the opposite direction for a one-sided FCR-D bid
   if(anyD&&!both){const lim=(P-1.34*CN)/0.2;CD=Math.min(CD,lim)}
   let CDu=u.Du?CD:0,CDd=u.Dd?CD:0;
   const need=(CN+CDu/3)+(CN+CDd/3);
@@ -244,11 +349,12 @@ function syncFields(){const u=use();[['f-cn',u.N],['f-cdu',u.Du],['f-cdd',u.Dd]]
 function compute(){
   const P=num('in-p',0.1,100,1),CAP=num('in-e',0.1,400,2),S0=num('in-s0',0,100,50),RT=num('in-eta',50,100,90)/100,ETA=Math.sqrt(RT);
   const {CN,CDu,CDd}=caps();
-  const resUp=CDu/3,resDn=CDd/3;              // FCR-D 20 min energy, held back first
-  let E=CAP*S0/100,eN=0,eD=0,eNem=0,thr=0,ne=0,nf=0,nn=0,na=0,nd=0,mn=101,mx=-1;
+  const resUp=CDu/3,resDn=CDd/3;
+  let E=CAP*S0/100,eN=0,eD=0,eNem=0,thr=0,ne=0,nf=0,nn=0,na=0,nd=0,mn=101,mx=-1,cumN=0,cumD=0,cumM=0;
   let lowN=false,highN=false,aemN=false,aemDu=false,aemDd=false,nemDu=false,nemDd=false;
   const bN=new Int8Array(300),bDu=new Int8Array(300),bDd=new Int8Array(300),fBuf=new Float64Array(300).fill(50);
-  let sN=0,sDu=0,sDd=0,fSum=50*300,k=0,cN=0,cDu=0,cDd=0,fref=50;
+  let sN=0,sDu=0,sDd=0,fSum=50*300,k=0,cN=0,cDu=0,cDd=0,fref=50,dmin=0,dmax=0;
+  const k100=100/CAP*DT;
   for(let i=0;i<n;i++){
     const f=fr[i];
     if(emOn){
@@ -273,7 +379,7 @@ function compute(){
     if(CDd>0){const fd=emOn&&aemDd?f-sh:f;let r=(fd-50.1)/0.4;vD-=(r>1?1:r<0?0:r)*CDd;}
     const vM=emOn?0.34*CN*cN+0.2*CDu*cDu+0.2*CDd*cDd:0;
     let v=vN+vD+vM;if(v>P)v=P;else if(v<-P)v=-P;
-    p[i]=v;pd[i]=vD;pn[i]=vM;
+    p[i]=v;pnN[i]=vN;pd[i]=vD;pn[i]=vM;
     const inA=emOn&&(aemN||aemDu||aemDd);aemF[i]=inA?1:0;
     if(vM!==0)nn++;if(inA)na++;if(vD!==0)nd++;
     eN+=Math.abs(vN);eD+=Math.abs(vD);eNem+=Math.abs(vM);thr+=Math.abs(v);
@@ -281,16 +387,25 @@ function compute(){
     if(E<=0){E=0;if(v>0)ne++;}
     if(E>=CAP){E=CAP;if(v<0)nf++;}
     const sc=E/CAP*100;soc[i]=sc;if(sc<mn)mn=sc;if(sc>mx)mx=sc;
+    cumN-=vN*k100;cumD-=vD*k100;cumM-=vM*k100;
+    dsN[i]=cumN;dsD[i]=cumD;dsM[i]=cumM;const l=sc-S0-cumN-cumD-cumM;dsL[i]=l;
+    const lo=Math.min(cumN,cumD,cumM,l),hi=Math.max(cumN,cumD,cumM,l);if(lo<dmin)dmin=lo;if(hi>dmax)dmax=hi;
   }
   empty=bands(i=>soc[i]<=0&&p[i]>0);full=bands(i=>soc[i]>=100&&p[i]<0);aemB=bands(i=>aemF[i]===1);
+  const ex=Math.max(10,Math.ceil(Math.max(-dmin,dmax)/10)*10);SPEC.s.drange=[-ex*1.04,ex*1.04];
+  stats={date:curDay,throughput_MWh:thr*DT,fcrn_response_MWh:eN*DT,fcrd_response_MWh:eD*DT,nem_correction_MWh:eNem*DT,
+    soc_used_fcrn_pct:dsN[n-1],soc_used_fcrd_pct:dsD[n-1],soc_from_nem_pct:dsM[n-1],soc_losses_limits_pct:dsL[n-1],
+    full_cycles:thr*DT/(2*CAP),fcrd_active_s:nd/10,nem_active_h:nn/36000,aem_h:na/36000,empty_h:ne/36000,full_h:nf/36000,soc_min_pct:mn,soc_max_pct:mx,soc_end_pct:soc[n-1],
+    f_min_Hz:fr[fminI],f_max_Hz:fr[fmaxI]};
   $('st-thr').textContent=mwh(thr*DT);$('st-n').textContent=CN>0?mwh(eN*DT):'off';$('st-d').textContent=(CDu+CDd)>0?mwh(eD*DT):'off';
   $('st-ne').textContent=emOn?mwh(eNem*DT):'off';
+  $('st-sn').textContent=CN>0?pts(dsN[n-1]):'off';$('st-sd').textContent=(CDu+CDd)>0?pts(dsD[n-1]):'off';
+  $('st-sm').textContent=emOn?pts(dsM[n-1]):'off';$('st-sl').textContent=pts(dsL[n-1]);
   $('st-cyc').textContent=(thr*DT/(2*CAP)).toFixed(2);
   $('st-dact').textContent=(CDu+CDd)>0?dur(nd/10):'off';
   $('st-nem').textContent=emOn?hrs(nn/10):'off';$('st-aem').textContent=emOn?hrs(na/10):'off';
   $('st-empty').textContent=hrs(ne/10);$('st-full').textContent=hrs(nf/10);
   $('st-min').textContent=Math.round(mn)+'–'+Math.round(mx)+' %';$('st-end').textContent=Math.round(soc[n-1])+' %';
-  // compliance
   const pu=1.34*CN+CDu+0.2*CDd,pdn=1.34*CN+CDd+0.2*CDu,eu=CN+CDu/3,ed=CN+CDd/3;
   const okP=Math.max(pu,pdn)<=P+1e-9,okE=eu+ed<=CAP+1e-9;
   const up0=CAP*S0/100,dn0=CAP-up0,okS=up0>=eu-1e-9&&dn0>=ed-1e-9;
@@ -301,9 +416,20 @@ function compute(){
     line(okS,'Start SOC: '+S0+' % leaves '+up0.toFixed(2)+' MWh up and '+dn0.toFixed(2)+' MWh down'+(okS?'':(eu+ed<=CAP?' (try '+Math.round(eu/(eu+ed)*100)+' %)':''))));
   const lim=Math.max(P,1e-3);
   SPEC.p.range=[-1.1*lim,1.1*lim];SPEC.p.splits=[-lim,-lim/2,0,lim/2,lim];SPEC.p.lines=[lim,0,-lim];
+  SPEC.p.labels=[];if(CN>0){SPEC.p.lines.push(CN,-CN);SPEC.p.labels.push([CN,'+C N'],[-CN,'−C N'])}
+  if(CDu>0&&Math.abs(CDu-CN)>lim*0.04){SPEC.p.lines.push(CDu);SPEC.p.labels.push([CDu,'+C D up'])}
+  if(CDd>0&&Math.abs(CDd-CN)>lim*0.04){SPEC.p.lines.push(-CDd);SPEC.p.labels.push([-CDd,'−C D down'])}
   SPEC.p.fmt=v=>v.toFixed(lim<1?2:lim<10?1:0);
-  $('h-p').textContent='Power, MW (dashed at battery limit ±'+P+' MW)';
-  // SOC threshold lines (% of capacity)
+  $('h-p').textContent='Power, MW (battery limit ±'+P+' MW)';
+  // frequency range and labelled thresholds
+  const lo=Math.min(fr[fminI],49.85),hi=Math.max(fr[fmaxI],50.15);
+  SPEC.f.range=fullRange?[49.45,50.55]:[Math.floor((lo-0.01)*100)/100,Math.ceil((hi+0.01)*100)/100];
+  const span=SPEC.f.range[1]-SPEC.f.range[0],st=span>0.6?0.1:span>0.3?0.05:0.05;
+  SPEC.f.splits=[];for(let v=Math.ceil(SPEC.f.range[0]/st)*st;v<=SPEC.f.range[1]+1e-9;v+=st)SPEC.f.splits.push(+v.toFixed(2));
+  SPEC.f.fmt=v=>v.toFixed(2);
+  SPEC.f.lines=[50,49.9,50.1,49.5,50.5];
+  SPEC.f.labels=[[50.1,'FCR-N full −C / FCR-D down starts'],[49.9,'FCR-N full +C / FCR-D up starts'],[49.5,'FCR-D up full'],[50.5,'FCR-D down full']];
+  // SOC threshold lines
   const L=[0,100],LB=[];const pc=e=>e/CAP*100;
   const add=(v,t)=>{if(v>0&&v<100){L.push(v);if(t&&!LB.some(([w])=>Math.abs(w-v)<4))LB.push([v,t])}};
   if(emOn){
@@ -313,15 +439,17 @@ function compute(){
     if(CDd>0){add(100-pc(CDd/3),'D down: NEM');add(100-pc(CDd*5/60),'D down: AEM');}
   }
   SPEC.s.lines=L;SPEC.s.labels=LB;
-  $('h-s').textContent=emOn?'State of charge, % (dashed: NEM and AEM switch-on levels)':'State of charge, %';
+  $('h-s').textContent='State of charge, %'+(emOn?' (dashed: NEM and AEM levels)':'');
   $('jumpd').disabled=(CDu+CDd)===0;
 }
+/* ---------- charts ---------- */
 const css=k=>getComputedStyle(document.documentElement).getPropertyValue(k).trim();
 const pad=v=>String(v).padStart(2,'0');
 const hms=s=>{s=Math.max(0,s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),sec=s%60;return pad(h)+':'+pad(m)+':'+(sec<10?'0':'')+sec.toFixed(1)};
 const hm=s=>{const h=Math.floor(s/3600),m=Math.floor(s%3600/60),sc=Math.floor(s%60);return pad(h)+':'+pad(m)+(sc?':'+pad(sc):'')};
 const INCRS=[0.1,0.2,0.5,1,2,5,10,15,30,60,120,300,600,900,1800,3600,7200,10800,14400,21600];
 const show={p:true,f:true,s:true};
+const sshow={'p:1':true,'p:2':true,'p:3':true,'p:4':true,'s:1':true,'s:2':true,'s:3':true,'s:4':true,'s:5':true};
 let win=86400,start=0,plots={},syncing=false,curMin=0,curMax=86400;
 const sel=$('start');
 function fillStart(){sel.innerHTML='';const step=win>=86400?86400:win;for(let s=0;s<86400;s+=step){const o=document.createElement('option');o.value=s;o.textContent=hm(s);sel.appendChild(o)}sel.disabled=win>=86400;sel.value=start-(start%step)}
@@ -332,37 +460,47 @@ function readout(i){if(i==null)return;const v=p[i],c=caps(),sg=w=>(w>=0?'+':'')+
   ro.innerHTML='<span><span class="k">Time </span>'+hms(x[i])+'</span>'+
   '<span class="fq"><span class="k">f </span>'+fr[i].toFixed(4)+' Hz</span>'+
   '<span class="'+(v>=0?'dis':'chg')+'"><span class="k">P </span>'+sg(v)+' MW</span>'+
+  (c.CN>0?'<span class="fn"><span class="k">FCR-N </span>'+sg(pnN[i])+'</span>':'')+
   ((c.CDu+c.CDd)>0?'<span class="fd"><span class="k">FCR-D </span>'+sg(pd[i])+'</span>':'')+
   (emOn?'<span class="nm"><span class="k">NEM </span>'+sg(pn[i])+'</span>':'')+
   '<span class="sc"><span class="k">SOC </span>'+soc[i].toFixed(1)+' %</span>'+
+  '<span class="k">used: <span class="fn">N '+dsN[i].toFixed(1)+'</span> <span class="fd">D '+dsD[i].toFixed(1)+'</span> <span class="nm">NEM '+dsM[i].toFixed(1)+'</span> <span class="ls">loss '+dsL[i].toFixed(1)+'</span></span>'+
   (aemF[i]?'<span class="pill">AEM</span>':'')+
   (soc[i]<=0&&v>0?'<span class="dis">empty, cannot deliver</span>':soc[i]>=100&&v<0?'<span class="chg">full, cannot absorb</span>':'')}
 function opts(k,w,isLast){
   const S=SPEC[k],g={stroke:css('--muted'),grid:{stroke:css('--line'),width:1},ticks:{stroke:css('--line'),width:1}};
   const base=Math.max(260,Math.min(420,Math.round(w*0.4)));
   const c=caps();
-  const series=[{},{stroke:css(S.color),width:k==='s'?1.5:1,points:{show:false}}];
-  if(k==='p'){series.push({stroke:css('--fcrd'),width:1.5,points:{show:false},show:(c.CDu+c.CDd)>0});series.push({stroke:css('--nem'),width:1.5,points:{show:false},show:emOn});}
-  return {width:w,height:Math.round(base*S.h),
-    scales:{x:{time:false},y:{range:S.range}},
-    legend:{show:false},
+  const ln=(col,wd,key,extra)=>Object.assign({stroke:css(col),width:wd,points:{show:false},show:key?sshow[key]:true},extra||{});
+  let series=[{},ln(S.color,k==='s'?1.75:1,k==='p'?'p:1':k==='s'?'s:1':null)];
+  const scales={x:{time:false},y:{range:S.range}};
+  const axes=[{...g,values:(u,vs)=>vs.map(hm),space:80,incrs:INCRS,size:isLast?40:30},
+              {...g,size:52,values:(u,vs)=>vs.map(S.fmt),splits:()=>S.splits}];
+  if(k==='p'){series.push(ln('--fcrn',1,'p:2',{show:sshow['p:2']&&c.CN>0}),ln('--fcrd',1.5,'p:3',{show:sshow['p:3']&&(c.CDu+c.CDd)>0}),ln('--nem',1.5,'p:4',{show:sshow['p:4']&&emOn}));}
+  if(k==='s'){scales.d={range:S.drange};
+    series.push(ln('--fcrn',1.25,'s:2',{scale:'d',show:sshow['s:2']&&c.CN>0}),ln('--fcrd',1.25,'s:3',{scale:'d',show:sshow['s:3']&&(c.CDu+c.CDd)>0}),ln('--nem',1.25,'s:4',{scale:'d',show:sshow['s:4']&&emOn}),ln('--loss',1.25,'s:5',{scale:'d',dash:[5,3]}));
+    axes.push({...g,scale:'d',side:1,size:52,grid:{show:false},values:(u,vs)=>vs.map(v=>(v>0?'+':'')+v.toFixed(0))});}
+  return {width:w,height:Math.round(base*S.h),scales,legend:{show:false},
     cursor:{drag:{x:true,y:false},points:{show:false},sync:{key:'fcr',setSeries:false}},
-    axes:[{...g,values:(u,vs)=>vs.map(hm),space:80,incrs:INCRS,size:isLast?40:30},
-          {...g,size:52,values:(u,vs)=>vs.map(S.fmt),splits:()=>S.splits}],
-    series,
+    axes,series,
     hooks:{
       setCursor:[u=>readout(u.cursor.idx)],
       setScale:[(u,key)=>{if(key!=='x'||syncing)return;const mn=u.scales.x.min,mx=u.scales.x.max;if(mn==null)return;curMin=mn;curMax=mx;syncing=true;for(const o in plots)if(plots[o]!==u)plots[o].setScale('x',{min:mn,max:mx});syncing=false}],
       setSelect:[u=>{if(u.select.width>0){const a=u.posToVal(u.select.left,'x'),b=u.posToVal(u.select.left+u.select.width,'x');u.setSelect({width:0,height:0},false);setAll(a,b);mark(null)}}],
-      drawClear:[u=>{const c=u.ctx;c.save();
-        const band=(list,col)=>{const path=new Path2D();for(const [a,b] of list){if(b<u.scales.x.min||a>u.scales.x.max)continue;const L=u.valToPos(Math.max(a,u.scales.x.min),'x',true),R=u.valToPos(Math.min(b,u.scales.x.max),'x',true);path.rect(Math.floor(L),u.bbox.top,Math.max(1,Math.ceil(R)-Math.floor(L)),u.bbox.height)}c.fillStyle=css(col);c.fill(path,'nonzero')};
-        band(aemB,'--aem');band(empty,'--empty');band(full,'--full');c.restore()}],
-      draw:[u=>{const c=u.ctx;c.save();c.strokeStyle=css('--band');c.setLineDash([4,4]);c.lineWidth=1;
-        S.lines.forEach(v=>{const y=u.valToPos(v,'y',true);c.beginPath();c.moveTo(u.bbox.left,y);c.lineTo(u.bbox.left+u.bbox.width,y);c.stroke()});
-        if(S.labels&&S.labels.length){const dpr=devicePixelRatio||1;c.setLineDash([]);c.font=(10*dpr)+'px '+css('--mono');c.textAlign='right';c.textBaseline='bottom';
-          S.labels.forEach(([v,t])=>{const y=u.valToPos(v,'y',true);const tw=c.measureText(t).width,xr=u.bbox.left+u.bbox.width-4*dpr;
-            c.fillStyle=css('--panel');c.fillRect(xr-tw-3*dpr,y-12*dpr,tw+6*dpr,11*dpr);c.fillStyle=css(t.startsWith('D')?'--fcrd':'--nem');c.fillText(t,xr,y-1*dpr)})}
-        c.restore()}]
+      drawClear:[u=>{const cx=u.ctx;cx.save();
+        if(k==='f'){const zone=(a,b,col)=>{const y1=u.valToPos(Math.min(b,u.scales.y.max),'y',true),y0=u.valToPos(Math.max(a,u.scales.y.min),'y',true);if(y0>y1){cx.fillStyle=css(col);cx.fillRect(u.bbox.left,y1,u.bbox.width,y0-y1)}};
+          zone(49.9,50.1,'--zn');zone(49.5,49.9,'--zd');zone(50.1,50.5,'--zd');}
+        const band=(list,col)=>{const path=new Path2D();for(const [a,b] of list){if(b<u.scales.x.min||a>u.scales.x.max)continue;const L=u.valToPos(Math.max(a,u.scales.x.min),'x',true),R=u.valToPos(Math.min(b,u.scales.x.max),'x',true);path.rect(Math.floor(L),u.bbox.top,Math.max(1,Math.ceil(R)-Math.floor(L)),u.bbox.height)}cx.fillStyle=css(col);cx.fill(path,'nonzero')};
+        if(k!=='f'){band(aemB,'--aem');band(empty,'--empty');band(full,'--full');}cx.restore()}],
+      draw:[u=>{const cx=u.ctx;cx.save();cx.strokeStyle=css('--band');cx.setLineDash([4,4]);cx.lineWidth=1;
+        const inY=v=>v>=u.scales.y.min&&v<=u.scales.y.max;
+        S.lines.forEach(v=>{if(!inY(v))return;const y=u.valToPos(v,'y',true);cx.beginPath();cx.moveTo(u.bbox.left,y);cx.lineTo(u.bbox.left+u.bbox.width,y);cx.stroke()});
+        if(k==='s'){const y=u.valToPos(0,'d',true);cx.strokeStyle=css('--loss');cx.setLineDash([1,3]);cx.beginPath();cx.moveTo(u.bbox.left,y);cx.lineTo(u.bbox.left+u.bbox.width,y);cx.stroke();}
+        if(S.labels&&S.labels.length){const dpr=devicePixelRatio||1;cx.setLineDash([]);cx.font=(10*dpr)+'px '+css('--mono');cx.textAlign='right';cx.textBaseline='bottom';
+          S.labels.forEach(([v,t])=>{if(!inY(v))return;const y=u.valToPos(v,'y',true);const tw=cx.measureText(t).width,xr=u.bbox.left+u.bbox.width-4*dpr;
+            const col=k==='f'?(t.startsWith('FCR-D')?'--fcrd':'--fcrn'):k==='p'?(t.includes('D')?'--fcrd':'--fcrn'):(t.startsWith('D')?'--fcrd':'--nem');
+            cx.fillStyle=css('--panel');cx.fillRect(xr-tw-3*dpr,y-12*dpr,tw+6*dpr,11*dpr);cx.fillStyle=css(col);cx.fillText(t,xr,y-1*dpr)})}
+        cx.restore()}]
     }};
 }
 function mark(w){document.querySelectorAll('button[data-w]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.w===w)))}
@@ -370,31 +508,86 @@ function build(){
   for(const k in plots)plots[k].destroy();plots={};
   const vis=['p','f','s'].filter(k=>show[k]);
   ['p','f','s'].forEach(k=>{$('w-'+k).hidden=!show[k];$('c-'+k).innerHTML=''});
-  const data={p:[x,p,pd,pn],f:[x,fr],s:[x,soc]};
+  const data={p:[x,p,pnN,pd,pn],f:[x,fr],s:[x,soc,dsN,dsD,dsM,dsL]};
   vis.forEach((k,j)=>{const el=$('c-'+k);plots[k]=new uPlot(opts(k,el.clientWidth||el.parentNode.clientWidth,j===vis.length-1),data[k],el)});
   setAll(curMin,curMax);
 }
 const redo=()=>{compute();build()};
 let tm;const later=fn=>{clearTimeout(tm);tm=setTimeout(fn,300)};
 document.querySelectorAll('button[data-w]').forEach(b=>b.addEventListener('click',()=>{win=+b.dataset.w;start=win>=86400?0:Math.floor(curMin/win)*win;mark(win);fillStart();setRange()}));
-document.querySelectorAll('button.tog').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.k;
+document.querySelectorAll('button.tog[data-k]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.k;
   if(show[k]&&Object.values(show).filter(Boolean).length===1)return;
   show[k]=!show[k];b.setAttribute('aria-pressed',String(show[k]));build()}));
-$('em-on').addEventListener('click',()=>{emOn=true;$('em-on').setAttribute('aria-pressed','true');$('em-off').setAttribute('aria-pressed','false');redo()});
-$('em-off').addEventListener('click',()=>{emOn=false;$('em-on').setAttribute('aria-pressed','false');$('em-off').setAttribute('aria-pressed','true');redo()});
+document.querySelectorAll('button.tog[data-s]').forEach(b=>b.addEventListener('click',()=>{const key=b.dataset.s;sshow[key]=!sshow[key];b.setAttribute('aria-pressed',String(sshow[key]));build()}));
+$('frange').addEventListener('click',()=>{fullRange=!fullRange;$('frange').setAttribute('aria-pressed',String(fullRange));compute();build()});
+$('em-on').addEventListener('click',()=>{setEm(true);redo()});
+$('em-off').addEventListener('click',()=>{setEm(false);redo()});
+function setEm(on){emOn=on;$('em-on').setAttribute('aria-pressed',String(on));$('em-off').setAttribute('aria-pressed',String(!on))}
 sel.addEventListener('change',()=>{start=+sel.value;setRange()});
 $('prev').addEventListener('click',()=>{start=curMin-Math.min(win,86400);setRange()});
 $('next').addEventListener('click',()=>{start=curMin+Math.min(win,86400);setRange()});
-$('jumpd').addEventListener('click',()=>{const c=caps();const iu=fminI,id=fmaxI;
-  const i=(c.CDu>0&&(c.CDd===0||(49.9-fr[iu])>=(fr[id]-50.1)))?iu:id;win=600;mark(600);start=Math.floor(Math.max(0,x[i]-300)/1)*1;fillStart();
-  start=Math.max(0,x[i]-300);setAll(start,start+win)});
+$('jumpd').addEventListener('click',()=>{const c=caps();
+  const i=(c.CDu>0&&(c.CDd===0||(49.9-fr[fminI])>=(fr[fmaxI]-50.1)))?fminI:fmaxI;win=600;mark(600);fillStart();
+  start=Math.max(0,Math.min(86400-600,x[i]-300));setAll(start,start+win)});
 ['in-p','in-e'].forEach(id=>$(id).addEventListener('input',()=>later(()=>{applySplit();redo()})));
 ['in-s0','in-eta','in-cn','in-cdu','in-cdd'].forEach(id=>$(id).addEventListener('input',()=>later(redo)));
 $('split').addEventListener('input',()=>{applySplit();later(redo)});
 ['use-n','use-du','use-dd'].forEach(id=>$(id).addEventListener('change',()=>{syncFields();applySplit();redo()}));
-$('reset').addEventListener('click',()=>{$('in-p').value=1;$('in-e').value=2;$('in-s0').value=50;$('in-eta').value=90;$('split').value=50;
-  ['use-n','use-du','use-dd'].forEach(id=>$(id).checked=true);syncFields();applySplit();redo()});
-syncFields();applySplit();compute();fillStart();
+$('reset').addEventListener('click',()=>{applySettings(DEFAULTS);redo()});
+/* ---------- settings, scenarios ---------- */
+const DEFAULTS={battery_power_MW:1,battery_energy_MWh:2,start_soc_pct:50,round_trip_eff_pct:90,fcrn:true,fcrd_up:true,fcrd_down:true,split_fcrn_pct:50,c_fcrn_MW:null,c_fcrd_up_MW:null,c_fcrd_down_MW:null,energy_management:true};
+function getSettings(){const u=use();return{battery_power_MW:num('in-p',0.1,100,1),battery_energy_MWh:num('in-e',0.1,400,2),start_soc_pct:num('in-s0',0,100,50),round_trip_eff_pct:num('in-eta',50,100,90),
+  fcrn:u.N,fcrd_up:u.Du,fcrd_down:u.Dd,split_fcrn_pct:num('split',0,100,50),c_fcrn_MW:num('in-cn',0,100,0),c_fcrd_up_MW:num('in-cdu',0,100,0),c_fcrd_down_MW:num('in-cdd',0,100,0),energy_management:emOn}}
+function applySettings(s){const v=(a,b)=>a==null||!isFinite(+a)?b:+a;
+  $('in-p').value=v(s.battery_power_MW,1);$('in-e').value=v(s.battery_energy_MWh,2);$('in-s0').value=v(s.start_soc_pct,50);$('in-eta').value=v(s.round_trip_eff_pct,90);
+  $('use-n').checked=s.fcrn!==false;$('use-du').checked=s.fcrd_up!==false;$('use-dd').checked=s.fcrd_down!==false;$('split').value=v(s.split_fcrn_pct,50);
+  syncFields();applySplit();
+  if(s.c_fcrn_MW!=null)$('in-cn').value=(+s.c_fcrn_MW).toFixed(2);if(s.c_fcrd_up_MW!=null)$('in-cdu').value=(+s.c_fcrd_up_MW).toFixed(2);if(s.c_fcrd_down_MW!=null)$('in-cdd').value=(+s.c_fcrd_down_MW).toFixed(2);
+  setEm(s.energy_management!==false)}
+const SKEY='fcr-sim-scenarios';
+const readSc=()=>{try{return JSON.parse(localStorage.getItem(SKEY)||'{}')||{}}catch(e){return {}}};
+const writeSc=o=>{try{localStorage.setItem(SKEY,JSON.stringify(o));return true}catch(e){return false}};
+const io=$('io-status');const say=(t,cls)=>{io.className='status'+(cls?' '+cls:'');io.textContent=t};
+function fillSc(sel){const o=readSc(),s=$('sc-list');s.innerHTML='';const ks=Object.keys(o).sort();
+  if(!ks.length){const e=document.createElement('option');e.textContent='No saved scenarios';e.value='';s.appendChild(e)}
+  ks.forEach(k=>{const e=document.createElement('option');e.value=k;e.textContent=k;s.appendChild(e)});if(sel)s.value=sel;
+  $('sc-load').disabled=$('sc-del').disabled=!ks.length}
+$('sc-save').addEventListener('click',()=>{const name=($('sc-name').value.trim()||('Scenario '+new Date().toISOString().slice(0,16).replace('T',' ')));
+  const o=readSc();o[name]={...getSettings(),saved:new Date().toISOString()};
+  if(writeSc(o)){fillSc(name);say('Saved "'+name+'" in this browser.','good')}else say('This browser blocked saving. Use Export summary + settings instead.','err')});
+$('sc-load').addEventListener('click',()=>{const k=$('sc-list').value,o=readSc();if(!o[k])return;applySettings(o[k]);redo();$('sc-name').value=k;say('Loaded "'+k+'".','good')});
+$('sc-del').addEventListener('click',()=>{const k=$('sc-list').value,o=readSc();if(!o[k])return;
+  if($('sc-del').dataset.armed!==k){$('sc-del').dataset.armed=k;$('sc-del').textContent='Confirm delete';setTimeout(()=>{$('sc-del').dataset.armed='';$('sc-del').textContent='Delete'},4000);return}
+  delete o[k];writeSc(o);fillSc();$('sc-del').dataset.armed='';$('sc-del').textContent='Delete';say('Deleted "'+k+'".')});
+$('sc-import').addEventListener('change',async ev=>{const f=ev.target.files[0];ev.target.value='';if(!f)return;
+  try{const j=JSON.parse(await f.text());const s=j.settings||j;if(typeof s!=='object'||!('battery_power_MW' in s))throw new Error('no settings found');
+    applySettings(s);redo();say('Imported settings from '+f.name+'.','good')}catch(e){say('Could not import '+f.name+': '+e.message,'err')}});
+/* ---------- export ---------- */
+let res=10;
+document.querySelectorAll('button.seg').forEach(b=>b.addEventListener('click',()=>{res=+b.dataset.res;document.querySelectorAll('button.seg').forEach(o=>o.setAttribute('aria-pressed',String(o===b)))}));
+let dlP=null;const getDl=()=>dlP||(dlP=(window.claude&&typeof window.claude.use==='function')?window.claude.use('downloads').catch(()=>null):Promise.resolve(null));
+async function saveFile(name,data){
+  const dl=await getDl();
+  if(dl){try{const r=await dl.save({filename:name,data});say(r&&r.status==='delivered'?'Sent '+name+'.':'Saved '+name+'.','good')}
+    catch(e){const c=e&&e.code;say(c==='declined'?'Save cancelled.':c==='too_large'?'File too large here. Try the 1 s resolution.':c==='rate_limited'?'A save is already waiting for your answer.':'Could not save '+name+(e&&e.message?': '+e.message:'.'),'err')}return}
+  if(window.claude){say('Downloads are not available in this view. Open the page in claude.ai or host it yourself.','err');return}
+  const url=URL.createObjectURL(data instanceof Blob?data:new Blob([data]));const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),20000);say('Downloaded '+name+'.','good')}
+const tag=()=>{const s=getSettings();return curDay+'_'+[s.fcrn?'N'+s.c_fcrn_MW:'',s.fcrd_up?'Du'+s.c_fcrd_up_MW:'',s.fcrd_down?'Dd'+s.c_fcrd_down_MW:''].filter(Boolean).join('-')}
+$('ex-csv').addEventListener('click',async()=>{say('Preparing CSV…');await new Promise(r=>setTimeout(r,0));
+  const head='time,frequency_Hz,p_total_MW,p_fcrn_MW,p_fcrd_MW,p_nem_MW,soc_pct,soc_used_fcrn_pct,soc_used_fcrd_pct,soc_from_nem_pct,soc_losses_limits_pct,aem\n';
+  const parts=[head];let chunk=[];const R=res;
+  const f4=v=>v.toFixed(4),f5=v=>v.toFixed(5);
+  for(let i=0;i<n;i+=R){
+    let fs=0,ps=0,pN=0,pD=0,pM=0,a=0;for(let j=i;j<i+R;j++){fs+=fr[j];ps+=p[j];pN+=pnN[j];pD+=pd[j];pM+=pn[j];a|=aemF[j]}
+    const e=i+R-1;
+    chunk.push(curDay+' '+hms(R===1?x[i]:x[i]).slice(0,R===1?10:8)+','+f5(fs/R)+','+f4(ps/R)+','+f4(pN/R)+','+f4(pD/R)+','+f4(pM/R)+','+soc[e].toFixed(3)+','+dsN[e].toFixed(3)+','+dsD[e].toFixed(3)+','+dsM[e].toFixed(3)+','+dsL[e].toFixed(3)+','+a);
+    if(chunk.length>=20000){parts.push(chunk.join('\n')+'\n');chunk=[]}}
+  if(chunk.length)parts.push(chunk.join('\n')+'\n');
+  await saveFile('fcr-sim_'+tag()+'_'+(R===1?'0.1s':'1s')+'.csv',new Blob(parts,{type:'text/csv'}))});
+$('ex-json').addEventListener('click',()=>{const out={generated:new Date().toISOString(),model:'FCR battery simulator (static FCR-N/FCR-D, Nordic NEM/AEM)',day:curDay,settings:getSettings(),results:stats};
+  saveFile('fcr-sim_'+tag()+'_summary.json',JSON.stringify(out,null,2))});
+/* ---------- start ---------- */
+fillDays();fillSc();syncFields();applySplit();compute();fillStart();
 requestAnimationFrame(build);
 let t;window.addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(build,150)});
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',build);

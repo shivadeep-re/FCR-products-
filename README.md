@@ -4,6 +4,14 @@ Simulates a battery providing **FCR-N** and **FCR-D up/down** (Frequency Contain
 
 The site is one self-contained HTML page. It plots all 864,000 samples of a day (power, frequency and SOC), lets you pick products, split battery power between FCR-N and FCR-D, change the battery and bid sizes, and recalculates everything in the browser.
 
+## Features
+
+- **Load your own data**: pick one or more Fingrid daily CSVs in the browser. They are cleaned the same way as `scripts/build_site.py` and added to the Day list. Nothing is uploaded.
+- **Products**: FCR-N, FCR-D up and FCR-D down, alone or combined, with a slider that splits battery power between FCR-N and FCR-D
+- **Charts** (0.1 s, zoomable, linked): total power with separate FCR-N, FCR-D and NEM lines; frequency with the FCR-N band and FCR-D zones marked (optionally the full 49.5–50.5 Hz range); SOC with the SOC points used by FCR-N, used by FCR-D, restored by NEM, and lost (losses and limits) on a second axis. Every line can be hidden.
+- **Scenarios**: save named settings in the browser, load or delete them, and import settings from an exported `.json`
+- **Export**: results as CSV at 1 s (averaged power and frequency, end-of-second SOC) or the full 0.1 s resolution, plus a summary `.json` holding the settings and all results. On claude.ai this uses the page's download capability; when self-hosted it is a normal browser download.
+
 ## Quick start
 
 ```bash
@@ -95,12 +103,11 @@ On GitHub, go to **Settings → Pages → Source: GitHub Actions**. Each push to
 
 ## Ideas to work on
 
-- Day picker for the whole month, or uploading your own Fingrid CSV in the browser
 - FCR-D dynamic response (ramp to 86 % within 7.5 s) and FCR-D-heavy days
 - Hourly bid sizes and hours without a bid
 - Revenue estimate from FCR-N capacity prices (Fingrid/Svenska kraftnät market data)
 - Battery ageing / cycle cost per day
-- Export results as CSV
+- Run a whole month in the browser and rank the days
 
 ## Sources
 
