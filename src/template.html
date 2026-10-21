@@ -1,13 +1,13 @@
-<title>FCR-N Battery Simulator</title>
+<title>FCR Battery Simulator</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /*UPLOT_CSS*/
-/* Layout: one operator-console column; battery setup, key figures, then stacked panels sharing one time axis */
+/* Layout: one operator-console column; battery + product setup, key figures, then stacked panels sharing one time axis */
 :root{
   --bg:#f5f7f8; --panel:#ffffff; --fg:#14212b; --muted:#5b6b76; --line:#d9e0e4;
-  --dis:#c2410c; --chg:#0e6ba8; --trace:#1f3a4d; --freq:#6d28d9; --soc:#047857; --nem:#c0267a; --band:#9aa9b3;
+  --dis:#c2410c; --chg:#0e6ba8; --trace:#1f3a4d; --freq:#6d28d9; --soc:#047857; --nem:#c0267a; --fcrd:#d97706; --band:#9aa9b3;
   --empty:rgba(194,65,12,.10); --full:rgba(14,107,168,.10); --aem:rgba(192,38,122,.12);
   --ok:#047857; --warn:#b45309;
   --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -15,11 +15,11 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0f161b; --panel:#162028; --fg:#e4ebef; --muted:#93a3ad; --line:#26343e;
-  --dis:#fb923c; --chg:#5cb8f0; --trace:#cfdde6; --freq:#b79cf7; --soc:#4ade9b; --nem:#f472b6; --band:#5d6e79;
+  --dis:#fb923c; --chg:#5cb8f0; --trace:#cfdde6; --freq:#b79cf7; --soc:#4ade9b; --nem:#f472b6; --fcrd:#fcd34d; --band:#5d6e79;
   --empty:rgba(251,146,60,.14); --full:rgba(92,184,240,.14); --aem:rgba(244,114,182,.16); --ok:#4ade9b; --warn:#fbbf24; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0f161b; --panel:#162028; --fg:#e4ebef; --muted:#93a3ad; --line:#26343e;
-  --dis:#fb923c; --chg:#5cb8f0; --trace:#cfdde6; --freq:#b79cf7; --soc:#4ade9b; --nem:#f472b6; --band:#5d6e79;
+  --dis:#fb923c; --chg:#5cb8f0; --trace:#cfdde6; --freq:#b79cf7; --soc:#4ade9b; --nem:#f472b6; --fcrd:#fcd34d; --band:#5d6e79;
   --empty:rgba(251,146,60,.14); --full:rgba(92,184,240,.14); --aem:rgba(244,114,182,.16); --ok:#4ade9b; --warn:#fbbf24; color-scheme:dark}
 html,body{background:var(--bg);color:var(--fg)}
 body{font-family:var(--sans);font-size:15px;line-height:1.5;
@@ -28,18 +28,29 @@ main{max-width:1200px;margin:0 auto;display:grid;gap:18px}
 h1{font-size:1.45rem;font-weight:600;margin:0;text-wrap:balance;letter-spacing:-.01em}
 .sub{color:var(--muted);margin:2px 0 0;max-width:76ch}
 .stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:10px 20px;font-variant-numeric:tabular-nums}
-.stat{display:grid}
+.stat{display:grid;align-content:start}
 .stat b{font-family:var(--mono);font-weight:500;font-size:1.15rem}
 .stat span{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px;display:grid;gap:12px;min-width:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px;display:grid;gap:14px;min-width:0}
 .setup .row{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:flex-end}
+.setup h2{font:600 .78rem var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0}
+.grp{display:grid;gap:8px;padding-top:12px;border-top:1px solid var(--line)}
 .fld{display:grid;gap:3px}
 .fld label{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .fld .in{display:flex;align-items:center;border:1px solid var(--line);border-radius:4px;background:var(--bg)}
 .fld input{font:500 1rem var(--mono);color:var(--fg);background:transparent;border:0;width:7.5ch;padding:6px 4px 6px 10px;font-variant-numeric:tabular-nums}
 .fld input:focus-visible{outline:none}
 .fld .in:focus-within{outline:2px solid var(--chg);outline-offset:1px}
+.fld.off{opacity:.45}
 .fld .u{font:.8rem var(--mono);color:var(--muted);padding-right:10px}
+.prod{display:flex;flex-wrap:wrap;gap:8px}
+.prod label{display:inline-flex;align-items:center;gap:7px;font:500 .88rem var(--sans);border:1px solid var(--line);border-radius:4px;padding:6px 10px;cursor:pointer;background:var(--bg)}
+.prod label:has(input:checked){border-color:var(--c);box-shadow:inset 3px 0 0 var(--c)}
+.prod input{accent-color:var(--c);margin:0}
+.split{display:grid;gap:4px;min-width:min(100%,360px);flex:1 1 360px}
+.split .ends{display:flex;justify-content:space-between;font:500 .82rem var(--mono);font-variant-numeric:tabular-nums}
+.split input[type=range]{width:100%;accent-color:var(--fcrd)}
+.split .hint{font-size:.78rem;color:var(--muted)}
 .check{font:.82rem var(--mono);display:grid;gap:2px;color:var(--muted)}
 .check .ok{color:var(--ok)} .check .bad{color:var(--warn)}
 .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -50,11 +61,11 @@ button.tog{display:inline-flex;align-items:center;gap:7px}
 button.tog i{width:12px;height:3px;border-radius:2px;background:var(--c)}
 button.tog[aria-pressed="false"]{color:var(--muted);text-decoration:line-through}
 button.tog[aria-pressed="false"] i{opacity:.3}
-button:focus-visible,select:focus-visible{outline:2px solid var(--chg);outline-offset:1px}
+button:focus-visible,select:focus-visible,.prod input:focus-visible,input[type=range]:focus-visible{outline:2px solid var(--chg);outline-offset:1px}
 .sep{width:1px;height:22px;background:var(--line)}
-.readout{font-family:var(--mono);font-size:.85rem;font-variant-numeric:tabular-nums;display:flex;flex-wrap:wrap;gap:4px 20px;min-height:1.4em}
+.readout{font-family:var(--mono);font-size:.85rem;font-variant-numeric:tabular-nums;display:flex;flex-wrap:wrap;gap:4px 18px;min-height:1.4em}
 .readout .k{color:var(--muted)}
-.dis{color:var(--dis)} .chg{color:var(--chg)} .fq{color:var(--freq)} .sc{color:var(--soc)} .nm{color:var(--nem)}
+.dis{color:var(--dis)} .chg{color:var(--chg)} .fq{color:var(--freq)} .sc{color:var(--soc)} .nm{color:var(--nem)} .fd{color:var(--fcrd)}
 .pill{font:600 .7rem var(--sans);letter-spacing:.05em;text-transform:uppercase;border-radius:3px;padding:1px 6px;background:var(--aem);color:var(--nem)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.8rem;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
@@ -66,45 +77,67 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--chg);outline-o
 .u-legend{display:none}
 .uplot{font-family:var(--mono)}
 .u-select{background:color-mix(in srgb,var(--chg) 18%,transparent)}
-.rules{display:grid;gap:6px;max-width:80ch}
-.rules h3{font-size:.95rem;margin:0}
+.rules{display:grid;gap:6px;max-width:82ch}
+.rules h3{font-size:.95rem;margin:8px 0 0}
 .rules ul{margin:0;padding-left:18px;color:var(--muted);font-size:.88rem;display:grid;gap:3px}
-.note{font-size:.82rem;color:var(--muted);max-width:80ch;margin:0}
+.note{font-size:.82rem;color:var(--muted);max-width:82ch;margin:0}
 .note a{color:var(--chg)}
 #loading{font-family:var(--mono);color:var(--muted);padding:40px 0;text-align:center}
 </style>
 <main>
   <header>
-    <h1>Battery power on FCR&#8209;N, __DATE_LONG__</h1>
-    <p class="sub">Every 0.1 s sample, 864,000 points, with Nordic LER energy management (NEM and AEM). Positive power is <span class="dis">discharging</span>, negative is <span class="chg">charging</span>. Change the battery below and everything recalculates.</p>
+    <h1>Battery on FCR&#8209;N and FCR&#8209;D, __DATE_LONG__</h1>
+    <p class="sub">Every 0.1 s sample, 864,000 points, with Nordic LER energy management (NEM and AEM). Run FCR-N, FCR-D or both on one battery and split its power between them. Positive power is <span class="dis">discharging</span>, negative is <span class="chg">charging</span>.</p>
   </header>
-  <section class="panel setup" aria-label="Battery setup">
+  <section class="panel setup" aria-label="Battery and product setup">
     <div class="row">
       <div class="fld"><label for="in-p">Battery power</label><div class="in"><input id="in-p" type="number" inputmode="decimal" min="0.1" max="100" step="0.1" value="1"><span class="u">MW</span></div></div>
       <div class="fld"><label for="in-e">Battery energy</label><div class="in"><input id="in-e" type="number" inputmode="decimal" min="0.1" max="400" step="0.1" value="2"><span class="u">MWh</span></div></div>
-      <div class="fld"><label for="in-c">FCR-N capacity C</label><div class="in"><input id="in-c" type="number" inputmode="decimal" min="0.01" max="100" step="0.01" value="0.74"><span class="u">MW</span></div></div>
       <div class="fld"><label for="in-s0">Start SOC</label><div class="in"><input id="in-s0" type="number" inputmode="decimal" min="0" max="100" step="1" value="50"><span class="u">%</span></div></div>
       <div class="fld"><label for="in-eta">Round-trip eff.</label><div class="in"><input id="in-eta" type="number" inputmode="decimal" min="50" max="100" step="1" value="90"><span class="u">%</span></div></div>
     </div>
-    <div class="row">
-      <div class="controls"><span class="lab">Energy management</span>
-        <button class="em" id="em-on" aria-pressed="true">NEM + AEM on</button>
-        <button class="em" id="em-off" aria-pressed="false">Off</button></div>
-      <button id="maxc">Set C to max allowed</button>
-      <button id="reset">Reset</button>
+    <div class="grp">
+      <h2>Products</h2>
+      <div class="prod">
+        <label style="--c:var(--trace)"><input type="checkbox" id="use-n" checked>FCR-N</label>
+        <label style="--c:var(--fcrd)"><input type="checkbox" id="use-du" checked>FCR-D up</label>
+        <label style="--c:var(--fcrd)"><input type="checkbox" id="use-dd" checked>FCR-D down</label>
+      </div>
+      <div class="row">
+        <div class="split">
+          <div class="ends"><span id="sp-n">FCR-N 50 %</span><span id="sp-d">50 % FCR-D</span></div>
+          <input type="range" id="split" min="0" max="100" step="5" value="50" aria-label="Share of battery power for FCR-N">
+          <span class="hint">Drag to split battery power. Capacities below are set to the most each product can bid, also limited by energy.</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="fld" id="f-cn"><label for="in-cn">FCR-N capacity</label><div class="in"><input id="in-cn" type="number" inputmode="decimal" min="0" max="100" step="0.01" value="0.37"><span class="u">MW</span></div></div>
+        <div class="fld" id="f-cdu"><label for="in-cdu">FCR-D up capacity</label><div class="in"><input id="in-cdu" type="number" inputmode="decimal" min="0" max="100" step="0.01" value="0.41"><span class="u">MW</span></div></div>
+        <div class="fld" id="f-cdd"><label for="in-cdd">FCR-D down capacity</label><div class="in"><input id="in-cdd" type="number" inputmode="decimal" min="0" max="100" step="0.01" value="0.41"><span class="u">MW</span></div></div>
+      </div>
     </div>
-    <div class="check" id="check"></div>
+    <div class="grp">
+      <div class="row">
+        <div class="controls"><span class="lab">Energy management</span>
+          <button class="em" id="em-on" aria-pressed="true">NEM + AEM on</button>
+          <button class="em" id="em-off" aria-pressed="false">Off</button></div>
+        <button id="reset">Reset</button>
+      </div>
+      <div class="check" id="check"></div>
+    </div>
   </section>
   <div class="stats">
-    <div class="stat"><b id="st-thr"></b><span>Throughput</span></div>
-    <div class="stat"><b class="dis" id="st-dis"></b><span>Discharged</span></div>
-    <div class="stat"><b class="chg" id="st-chg"></b><span>Charged</span></div>
+    <div class="stat"><b id="st-thr"></b><span>Battery throughput</span></div>
+    <div class="stat"><b id="st-n"></b><span>FCR-N response</span></div>
+    <div class="stat"><b class="fd" id="st-d"></b><span>FCR-D response</span></div>
+    <div class="stat"><b class="nm" id="st-ne"></b><span>NEM correction</span></div>
     <div class="stat"><b id="st-cyc"></b><span>Full cycles</span></div>
+    <div class="stat"><b class="fd" id="st-dact"></b><span>FCR-D activated</span></div>
     <div class="stat"><b class="nm" id="st-nem"></b><span>NEM active</span></div>
     <div class="stat"><b class="nm" id="st-aem"></b><span>In AEM (unavailable)</span></div>
     <div class="stat"><b class="dis" id="st-empty"></b><span>Empty, can't discharge</span></div>
     <div class="stat"><b class="chg" id="st-full"></b><span>Full, can't charge</span></div>
-    <div class="stat"><b id="st-min"></b><span>Lowest SOC</span></div>
+    <div class="stat"><b id="st-min"></b><span>SOC range</span></div>
     <div class="stat"><b id="st-end"></b><span>SOC at midnight</span></div>
   </div>
   <section class="panel">
@@ -125,10 +158,13 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--chg);outline-o
       <select id="start"></select>
       <button id="prev" aria-label="Previous window">◀</button>
       <button id="next" aria-label="Next window">▶</button>
+      <span class="sep"></span>
+      <button id="jumpd" title="Jump to the largest FCR-D activation">Largest FCR-D event</button>
     </div>
     <div class="legend">
-      <span><i class="ln" style="--c:var(--trace)"></i>Battery power (FCR-N + NEM)</span>
-      <span><i class="ln" style="--c:var(--nem)"></i>NEM power</span>
+      <span><i class="ln" style="--c:var(--trace)"></i>Battery power (total)</span>
+      <span><i class="ln" style="--c:var(--fcrd)"></i>FCR-D part</span>
+      <span><i class="ln" style="--c:var(--nem)"></i>NEM part</span>
       <span><i style="--c:var(--aem)"></i>AEM</span>
       <span><i style="--c:var(--empty)"></i>Empty</span>
       <span><i style="--c:var(--full)"></i>Full</span>
@@ -141,15 +177,25 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--chg);outline-o
     </div>
   </section>
   <section class="rules">
-    <h3>How NEM and AEM are modelled</h3>
+    <h3>Products</h3>
     <ul>
-      <li>Thresholds are minutes of full FCR-N activation left: stored energy ÷ C for discharging, free room ÷ C for charging.</li>
-      <li><b>NEM</b> switches on when either side drops below 30 min and off again above 57.5 min. It is only allowed while frequency is within 49.9–50.1 Hz. Its signal (−1, 0 or +1) is averaged over the last 300 s at 1 s steps, so it ramps in over 5 minutes. NEM power is 0.34 × C × that average, added to the FCR-N response.</li>
-      <li><b>AEM</b> switches on at 5 min or less left on either side, at any frequency, and off above 10 min. In AEM the battery responds around the 5-minute average frequency instead of 50 Hz and counts as unavailable. NEM keeps running in parallel.</li>
-      <li>Sizing rules: battery power ≥ 1.34 × C and at least 1 h × C of energy in each direction, so energy ≥ 2 h × C.</li>
+      <li><b>FCR-N</b>: P = C<sub>N</sub> × (50 − f) / 0.1 Hz, limited to ±C<sub>N</sub>. Linear, full output at 49.9 and 50.1 Hz, no deadband.</li>
+      <li><b>FCR-D up</b>: discharges below 49.9 Hz, rising linearly to full C<sub>D↑</sub> at 49.5 Hz. <b>FCR-D down</b>: charges above 50.1 Hz, rising linearly to full C<sub>D↓</sub> at 50.5 Hz. Modelled as a static response, without the dynamic ramp-up of the real requirement.</li>
+      <li>When products run together their responses are added and the total is limited by the battery's rated power. The response figures above are each product's own energy (charge plus discharge); they can add up to more than the battery throughput because NEM and FCR-N partly cancel out.</li>
+    </ul>
+    <h3>Sizing check</h3>
+    <ul>
+      <li>Power upwards ≥ 1.34 C<sub>N</sub> + C<sub>D↑</sub> + 0.2 C<sub>D↓</sub>, and downwards ≥ 1.34 C<sub>N</sub> + C<sub>D↓</sub> + 0.2 C<sub>D↑</sub>. The 0.34 and 0.2 shares are reserved for NEM.</li>
+      <li>Energy: FCR-N needs 1 h × C<sub>N</sub> in each direction, FCR-D needs 20 min × C<sub>D</sub> in its own direction. When products are combined, the requirements are added up (my assumption; the source does not spell out combined bids).</li>
+    </ul>
+    <h3>Energy management (NEM and AEM)</h3>
+    <ul>
+      <li>Thresholds are minutes of full activation left. The FCR-D 20-minute energy is held back first, and FCR-N's thresholds only count the energy above it (my assumption for sharing one reservoir).</li>
+      <li><b>FCR-N NEM</b>: on below 30 min and off above 57.5 min; power 0.34 × C<sub>N</sub>. <b>FCR-D NEM</b>: on below 20 min and off above 20 min; power 0.2 × C<sub>D</sub>, restoring the direction FCR-D uses. NEM only runs while 49.9 &lt; f &lt; 50.1 Hz and is averaged over 300 s at 1 s steps.</li>
+      <li><b>AEM</b>, per product: on at 5 min or less left, at any frequency, and off above 10 min. The product then responds around the 5-minute average frequency instead of 50 Hz and counts as unavailable. NEM keeps running alongside.</li>
     </ul>
   </section>
-  <p class="note">Sources: ENTSO-E, <a href="https://www.statnett.no/link/fe89e089e1fd4154947ca28e6ea8c3fc.aspx" target="_blank" rel="noopener">Technical Requirements for FCR Provision in the Nordic Synchronous Area v1.1</a> (28 Mar 2025), section 3.5 and Table 10; Energinet, <a href="https://en.energinet.dk/media/r4rbirq2/prequalfication-of-fcr-n-and-fcr-d.pdf" target="_blank" rel="noopener">Prequalification of FCR-N and FCR-D</a> (NEM and AEM thresholds and formulas). Frequency: Fingrid 0.1 s data, file __DATE_ISO__, times as given in the file. FCR-N response is linear with full output at ±100 mHz and no deadband. SOC is limited to 0–100 % and losses are split evenly between charging and discharging. Bid size changes by hour are not modelled.</p>
+  <p class="note">Sources: ENTSO-E, <a href="https://www.statnett.no/link/fe89e089e1fd4154947ca28e6ea8c3fc.aspx" target="_blank" rel="noopener">Technical Requirements for FCR Provision in the Nordic Synchronous Area v1.1</a> (28 Mar 2025), section 3.5 and Table 10; Energinet, <a href="https://en.energinet.dk/media/r4rbirq2/prequalfication-of-fcr-n-and-fcr-d.pdf" target="_blank" rel="noopener">Prequalification of FCR-N and FCR-D</a> (NEM and AEM thresholds, power shares and energy reservations). Frequency: Fingrid 0.1 s data, file __DATE_ISO__, times as given in the file. SOC is limited to 0–100 %, and losses are split evenly between charging and discharging. Hourly bid changes are not modelled.</p>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/uplot@1.6.30/dist/uPlot.iife.min.js"></script>
 <script>
@@ -158,73 +204,117 @@ const B64="__DATA__";
 const bin=atob(B64), n=bin.length/2, buf=new ArrayBuffer(bin.length), u8=new Uint8Array(buf);
 for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
 const q=new Int16Array(buf);
-const x=new Float64Array(n), fr=new Float32Array(n), p=new Float32Array(n), pn=new Float32Array(n), soc=new Float32Array(n), aemF=new Uint8Array(n);
-for(let i=0;i<n;i++){x[i]=i/10;fr[i]=50+q[i]/1e5;}
+const x=new Float64Array(n), fr=new Float32Array(n), p=new Float32Array(n), pd=new Float32Array(n), pn=new Float32Array(n), soc=new Float32Array(n), aemF=new Uint8Array(n);
+let fminI=0;
+for(let i=0;i<n;i++){x[i]=i/10;fr[i]=50+q[i]/1e5;if(fr[i]<fr[fminI])fminI=i;}
+let fmaxI=0;for(let i=0;i<n;i++)if(fr[i]>fr[fmaxI])fmaxI=i;
 const DT=0.1/3600; let empty=[],full=[],aemB=[],emOn=true;
 const $=id=>document.getElementById(id);
 const num=(id,lo,hi,def)=>{const v=parseFloat($(id).value);return isFinite(v)?Math.min(hi,Math.max(lo,v)):def};
-const fmtH=s=>{const h=Math.floor(s/3600),m=Math.round(s%3600/60);return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')};
 const hrs=s=>s<36?'0 h':(s/3600<10?(s/3600).toFixed(1):Math.round(s/3600))+' h';
-const maxC=()=>Math.floor(Math.min(num('in-p',0.1,100,1)/1.34,num('in-e',0.1,400,2)/2)*100)/100;
+const dur=s=>s<60?Math.round(s)+' s':s<3600?(s/60).toFixed(1)+' min':(s/3600).toFixed(1)+' h';
+const mwh=v=>v<0.1?(v*1000).toFixed(v<0.01?1:0)+' kWh':v.toFixed(2)+' MWh';
 const SPEC={
   p:{color:'--trace',range:[-1.1,1.1],splits:[-1,-0.5,0,0.5,1],fmt:v=>v.toFixed(1),lines:[1,0,-1],h:1},
   f:{color:'--freq',range:[49.84,50.16],splits:[49.85,49.9,49.95,50,50.05,50.1,50.15],fmt:v=>v.toFixed(2),lines:[50.1,50,49.9],h:.75},
   s:{color:'--soc',range:[-4,104],splits:[0,25,50,75,100],fmt:v=>v.toFixed(0),lines:[100,50,0],h:.75}
 };
 function bands(flag){const out=[];let s=-1;for(let i=0;i<n;i++){if(flag(i)){if(s<0)s=i}else if(s>=0){out.push([s/10,i/10]);s=-1}}if(s>=0)out.push([s/10,n/10]);return out}
+const use=()=>({N:$('use-n').checked,Du:$('use-du').checked,Dd:$('use-dd').checked});
+function caps(){const u=use();return{CN:u.N?num('in-cn',0,100,0):0,CDu:u.Du?num('in-cdu',0,100,0):0,CDd:u.Dd?num('in-cdd',0,100,0):0}}
+/* Fill capacities from the split slider: most each product can bid with its share of power, then scaled to fit energy */
+function applySplit(){
+  const u=use(),P=num('in-p',0.1,100,1),CAP=num('in-e',0.1,400,2);
+  let s=num('split',0,100,50)/100;
+  const anyD=u.Du||u.Dd; if(!u.N)s=0; if(!anyD)s=1;
+  $('split').disabled=!(u.N&&anyD);
+  $('sp-n').textContent='FCR-N '+Math.round(s*100)+' %';$('sp-d').textContent=Math.round((1-s)*100)+' % FCR-D';
+  let CN=u.N?s*P/1.34:0;
+  const both=u.Du&&u.Dd, PD=(1-s)*P;
+  let CD=anyD?PD/(both?1.2:1):0;
+  // power check in the opposite direction for a one-sided FCR-D bid
+  if(anyD&&!both){const lim=(P-1.34*CN)/0.2;CD=Math.min(CD,lim)}
+  let CDu=u.Du?CD:0,CDd=u.Dd?CD:0;
+  const need=(CN+CDu/3)+(CN+CDd/3);
+  if(need>CAP){const k=CAP/need;CN*=k;CDu*=k;CDd*=k}
+  const fl=v=>(Math.floor(v*100+1e-6)/100).toFixed(2);
+  $('in-cn').value=fl(CN);$('in-cdu').value=fl(CDu);$('in-cdd').value=fl(CDd);
+}
+function syncFields(){const u=use();[['f-cn',u.N],['f-cdu',u.Du],['f-cdd',u.Dd]].forEach(([id,on])=>{$(id).classList.toggle('off',!on);$(id).querySelector('input').disabled=!on})}
 function compute(){
-  const P=num('in-p',0.1,100,1),CAP=num('in-e',0.1,400,2),C=num('in-c',0.01,100,0.74),S0=num('in-s0',0,100,50),RT=num('in-eta',50,100,90)/100,ETA=Math.sqrt(RT);
-  let E=CAP*S0/100,dis=0,chg=0,ne=0,nf=0,nn=0,na=0,mn=101;
-  let lowN=false,highN=false,aem=false;
-  const nemBuf=new Int8Array(300),fBuf=new Float64Array(300).fill(50);let nemSum=0,fSum=50*300,k=0,nemCur=0,fref=50;
+  const P=num('in-p',0.1,100,1),CAP=num('in-e',0.1,400,2),S0=num('in-s0',0,100,50),RT=num('in-eta',50,100,90)/100,ETA=Math.sqrt(RT);
+  const {CN,CDu,CDd}=caps();
+  const resUp=CDu/3,resDn=CDd/3;              // FCR-D 20 min energy, held back first
+  let E=CAP*S0/100,eN=0,eD=0,eNem=0,thr=0,ne=0,nf=0,nn=0,na=0,nd=0,mn=101,mx=-1;
+  let lowN=false,highN=false,aemN=false,aemDu=false,aemDd=false,nemDu=false,nemDd=false;
+  const bN=new Int8Array(300),bDu=new Int8Array(300),bDd=new Int8Array(300),fBuf=new Float64Array(300).fill(50);
+  let sN=0,sDu=0,sDd=0,fSum=50*300,k=0,cN=0,cDu=0,cDd=0,fref=50;
   for(let i=0;i<n;i++){
     const f=fr[i];
-    const up=E/C*60, dn=(CAP-E)/C*60;   // minutes of full activation left
     if(emOn){
-      if(up<30)lowN=true; else if(up>57.5)lowN=false;
-      if(dn<30)highN=true; else if(dn>57.5)highN=false;
-      if(up<=5||dn<=5)aem=true; else if(up>10&&dn>10)aem=false;
+      if(CN>0){const up=(E-resUp)/CN*60,dn=(CAP-E-resDn)/CN*60;
+        if(up<30)lowN=true;else if(up>57.5)lowN=false;
+        if(dn<30)highN=true;else if(dn>57.5)highN=false;
+        if(up<=5||dn<=5)aemN=true;else if(up>10&&dn>10)aemN=false;}
+      if(CDu>0){const up=E/CDu*60;nemDu=up<20;if(up<=5)aemDu=true;else if(up>10)aemDu=false;}
+      if(CDd>0){const dn=(CAP-E)/CDd*60;nemDd=dn<20;if(dn<=5)aemDd=true;else if(dn>10)aemDd=false;}
       if(i%10===0){
-        const allowed=(f>49.9&&f<50.1)?(lowN?-1:highN?1:0):0;
-        nemSum+=allowed-nemBuf[k];nemBuf[k]=allowed;
+        const normal=f>49.9&&f<50.1;
+        const aN=normal&&CN>0?(lowN?-1:highN?1:0):0, aDu=normal&&nemDu?-1:0, aDd=normal&&nemDd?1:0;
+        sN+=aN-bN[k];bN[k]=aN;sDu+=aDu-bDu[k];bDu[k]=aDu;sDd+=aDd-bDd[k];bDd[k]=aDd;
         fSum+=f-fBuf[k];fBuf[k]=f;k=(k+1)%300;
-        nemCur=nemSum/300;fref=fSum/300;
+        cN=sN/300;cDu=sDu/300;cDd=sDd/300;fref=fSum/300;
       }
     }
-    const ref=emOn&&aem?fref:50;
-    let pf=(ref-f)/0.1; pf=(pf>1?1:pf<-1?-1:pf)*C;
-    const pnem=emOn?0.34*C*nemCur:0;
-    let v=pf+pnem; if(v>P)v=P; else if(v<-P)v=-P;
-    p[i]=v; pn[i]=pnem; aemF[i]=emOn&&aem?1:0;
-    if(pnem!==0)nn++; if(aemF[i])na++;
+    const sh=fref-50;
+    let vN=0,vD=0;
+    if(CN>0){let r=((emOn&&aemN?fref:50)-f)/0.1;vN=(r>1?1:r<-1?-1:r)*CN;}
+    if(CDu>0){const fu=emOn&&aemDu?f-sh:f;let r=(49.9-fu)/0.4;vD+=(r>1?1:r<0?0:r)*CDu;}
+    if(CDd>0){const fd=emOn&&aemDd?f-sh:f;let r=(fd-50.1)/0.4;vD-=(r>1?1:r<0?0:r)*CDd;}
+    const vM=emOn?0.34*CN*cN+0.2*CDu*cDu+0.2*CDd*cDd:0;
+    let v=vN+vD+vM;if(v>P)v=P;else if(v<-P)v=-P;
+    p[i]=v;pd[i]=vD;pn[i]=vM;
+    const inA=emOn&&(aemN||aemDu||aemDd);aemF[i]=inA?1:0;
+    if(vM!==0)nn++;if(inA)na++;if(vD!==0)nd++;
+    eN+=Math.abs(vN);eD+=Math.abs(vD);eNem+=Math.abs(vM);thr+=Math.abs(v);
     E+=(v<0?-v*ETA:-v/ETA)*DT;
     if(E<=0){E=0;if(v>0)ne++;}
     if(E>=CAP){E=CAP;if(v<0)nf++;}
-    soc[i]=E/CAP*100; if(soc[i]<mn)mn=soc[i];
-    if(v>0)dis+=v;else chg-=v;
+    const sc=E/CAP*100;soc[i]=sc;if(sc<mn)mn=sc;if(sc>mx)mx=sc;
   }
   empty=bands(i=>soc[i]<=0&&p[i]>0);full=bands(i=>soc[i]>=100&&p[i]<0);aemB=bands(i=>aemF[i]===1);
-  dis*=DT;chg*=DT;
-  $('st-thr').textContent=(dis+chg).toFixed(2)+' MWh';$('st-dis').textContent=dis.toFixed(2)+' MWh';$('st-chg').textContent=chg.toFixed(2)+' MWh';
-  $('st-cyc').textContent=((dis+chg)/(2*CAP)).toFixed(2);
+  $('st-thr').textContent=mwh(thr*DT);$('st-n').textContent=CN>0?mwh(eN*DT):'off';$('st-d').textContent=(CDu+CDd)>0?mwh(eD*DT):'off';
+  $('st-ne').textContent=emOn?mwh(eNem*DT):'off';
+  $('st-cyc').textContent=(thr*DT/(2*CAP)).toFixed(2);
+  $('st-dact').textContent=(CDu+CDd)>0?dur(nd/10):'off';
   $('st-nem').textContent=emOn?hrs(nn/10):'off';$('st-aem').textContent=emOn?hrs(na/10):'off';
   $('st-empty').textContent=hrs(ne/10);$('st-full').textContent=hrs(nf/10);
-  $('st-min').textContent=mn.toFixed(0)+' %';$('st-end').textContent=Math.round(soc[n-1])+' %';
-  const okP=P>=1.34*C-1e-9, okE=CAP>=2*C-1e-9;
-  $('check').innerHTML='<span class="'+(okP?'ok':'bad')+'">'+(okP?'✓':'✗')+' Power: needs 1.34 × C = '+(1.34*C).toFixed(2)+' MW, battery has '+P+' MW</span>'+
-    '<span class="'+(okE?'ok':'bad')+'">'+(okE?'✓':'✗')+' Energy: needs 1 h × C each way = '+(2*C).toFixed(2)+' MWh, battery has '+CAP+' MWh</span>'+
-    '<span>Max C for this battery: '+maxC().toFixed(2)+' MW</span>';
+  $('st-min').textContent=Math.round(mn)+'–'+Math.round(mx)+' %';$('st-end').textContent=Math.round(soc[n-1])+' %';
+  // compliance
+  const pu=1.34*CN+CDu+0.2*CDd,pdn=1.34*CN+CDd+0.2*CDu,eu=CN+CDu/3,ed=CN+CDd/3;
+  const okP=Math.max(pu,pdn)<=P+1e-9,okE=eu+ed<=CAP+1e-9;
+  const up0=CAP*S0/100,dn0=CAP-up0,okS=up0>=eu-1e-9&&dn0>=ed-1e-9;
+  const line=(ok,t)=>'<span class="'+(ok?'ok':'bad')+'">'+(ok?'✓ ':'✗ ')+t+'</span>';
+  $('check').innerHTML=(CN+CDu+CDd===0?'<span class="bad">✗ No product selected or all capacities are 0</span>':
+    line(okP,'Power: needs '+pu.toFixed(2)+' MW up and '+pdn.toFixed(2)+' MW down, battery has '+P+' MW')+
+    line(okE,'Energy: needs '+eu.toFixed(2)+' MWh up + '+ed.toFixed(2)+' MWh down = '+(eu+ed).toFixed(2)+' MWh, battery has '+CAP+' MWh')+
+    line(okS,'Start SOC: '+S0+' % leaves '+up0.toFixed(2)+' MWh up and '+dn0.toFixed(2)+' MWh down'+(okS?'':(eu+ed<=CAP?' (try '+Math.round(eu/(eu+ed)*100)+' %)':''))));
   const lim=Math.max(P,1e-3);
-  SPEC.p.range=[-1.1*lim,1.1*lim];SPEC.p.splits=[-lim,-lim/2,0,lim/2,lim];SPEC.p.lines=[C,0,-C];
+  SPEC.p.range=[-1.1*lim,1.1*lim];SPEC.p.splits=[-lim,-lim/2,0,lim/2,lim];SPEC.p.lines=[lim,0,-lim];
   SPEC.p.fmt=v=>v.toFixed(lim<1?2:lim<10?1:0);
-  $('h-p').textContent='Power, MW (battery '+P+' MW, dashed at ±C = '+C+' MW)';
-  // SOC threshold lines in %
-  const pct=m=>m/60*C/CAP*100, L=[0,100];
-  const LB=[];
-  if(emOn){[30,57.5,5,10].forEach(m=>{const a=pct(m);if(a<100){L.push(a,100-a)}});
-    [[30,'NEM on'],[57.5,'NEM off'],[5,'AEM']].forEach(([m,t])=>{const a=pct(m);if(a<100){LB.push([a,t],[100-a,t])}})}
+  $('h-p').textContent='Power, MW (dashed at battery limit ±'+P+' MW)';
+  // SOC threshold lines (% of capacity)
+  const L=[0,100],LB=[];const pc=e=>e/CAP*100;
+  const add=(v,t)=>{if(v>0&&v<100){L.push(v);if(t&&!LB.some(([w])=>Math.abs(w-v)<4))LB.push([v,t])}};
+  if(emOn){
+    if(CN>0){add(pc(resUp+CN*0.5),'N: NEM on');add(pc(resUp+CN*57.5/60),'N: NEM off');add(pc(resUp+CN*5/60),'N: AEM');
+             add(100-pc(resDn+CN*0.5),'N: NEM on');add(100-pc(resDn+CN*57.5/60),'N: NEM off');add(100-pc(resDn+CN*5/60),'N: AEM');}
+    if(CDu>0){add(pc(CDu/3),'D up: NEM');add(pc(CDu*5/60),'D up: AEM');}
+    if(CDd>0){add(100-pc(CDd/3),'D down: NEM');add(100-pc(CDd*5/60),'D down: AEM');}
+  }
   SPEC.s.lines=L;SPEC.s.labels=LB;
-  $('h-s').textContent=emOn?'State of charge, % (dashed: NEM 30 / 57.5 min and AEM 5 / 10 min levels)':'State of charge, %';
+  $('h-s').textContent=emOn?'State of charge, % (dashed: NEM and AEM switch-on levels)':'State of charge, %';
+  $('jumpd').disabled=(CDu+CDd)===0;
 }
 const css=k=>getComputedStyle(document.documentElement).getPropertyValue(k).trim();
 const pad=v=>String(v).padStart(2,'0');
@@ -238,23 +328,25 @@ function fillStart(){sel.innerHTML='';const step=win>=86400?86400:win;for(let s=
 function setAll(min,max){curMin=min;curMax=max;syncing=true;for(const k in plots)plots[k].setScale('x',{min,max});syncing=false}
 function setRange(){start=Math.max(0,Math.min(86400-win,start));setAll(start,start+win);if(win<86400)sel.value=start-(start%win)}
 const ro=$('readout');
-function readout(i){if(i==null)return;const v=p[i];
+function readout(i){if(i==null)return;const v=p[i],c=caps(),sg=w=>(w>=0?'+':'')+w.toFixed(3);
   ro.innerHTML='<span><span class="k">Time </span>'+hms(x[i])+'</span>'+
   '<span class="fq"><span class="k">f </span>'+fr[i].toFixed(4)+' Hz</span>'+
-  '<span class="'+(v>=0?'dis':'chg')+'"><span class="k">P </span>'+(v>=0?'+':'')+v.toFixed(3)+' MW</span>'+
-  (emOn?'<span class="nm"><span class="k">NEM </span>'+(pn[i]>=0?'+':'')+pn[i].toFixed(3)+' MW</span>':'')+
+  '<span class="'+(v>=0?'dis':'chg')+'"><span class="k">P </span>'+sg(v)+' MW</span>'+
+  ((c.CDu+c.CDd)>0?'<span class="fd"><span class="k">FCR-D </span>'+sg(pd[i])+'</span>':'')+
+  (emOn?'<span class="nm"><span class="k">NEM </span>'+sg(pn[i])+'</span>':'')+
   '<span class="sc"><span class="k">SOC </span>'+soc[i].toFixed(1)+' %</span>'+
   (aemF[i]?'<span class="pill">AEM</span>':'')+
   (soc[i]<=0&&v>0?'<span class="dis">empty, cannot deliver</span>':soc[i]>=100&&v<0?'<span class="chg">full, cannot absorb</span>':'')}
 function opts(k,w,isLast){
   const S=SPEC[k],g={stroke:css('--muted'),grid:{stroke:css('--line'),width:1},ticks:{stroke:css('--line'),width:1}};
   const base=Math.max(260,Math.min(420,Math.round(w*0.4)));
+  const c=caps();
   const series=[{},{stroke:css(S.color),width:k==='s'?1.5:1,points:{show:false}}];
-  if(k==='p'&&emOn)series.push({stroke:css('--nem'),width:1.5,points:{show:false}});
+  if(k==='p'){series.push({stroke:css('--fcrd'),width:1.5,points:{show:false},show:(c.CDu+c.CDd)>0});series.push({stroke:css('--nem'),width:1.5,points:{show:false},show:emOn});}
   return {width:w,height:Math.round(base*S.h),
     scales:{x:{time:false},y:{range:S.range}},
     legend:{show:false},
-    cursor:{drag:{x:true,y:false},points:{show:false},sync:{key:'fcrn',setSeries:false}},
+    cursor:{drag:{x:true,y:false},points:{show:false},sync:{key:'fcr',setSeries:false}},
     axes:[{...g,values:(u,vs)=>vs.map(hm),space:80,incrs:INCRS,size:isLast?40:30},
           {...g,size:52,values:(u,vs)=>vs.map(S.fmt),splits:()=>S.splits}],
     series,
@@ -269,7 +361,7 @@ function opts(k,w,isLast){
         S.lines.forEach(v=>{const y=u.valToPos(v,'y',true);c.beginPath();c.moveTo(u.bbox.left,y);c.lineTo(u.bbox.left+u.bbox.width,y);c.stroke()});
         if(S.labels&&S.labels.length){const dpr=devicePixelRatio||1;c.setLineDash([]);c.font=(10*dpr)+'px '+css('--mono');c.textAlign='right';c.textBaseline='bottom';
           S.labels.forEach(([v,t])=>{const y=u.valToPos(v,'y',true);const tw=c.measureText(t).width,xr=u.bbox.left+u.bbox.width-4*dpr;
-            c.fillStyle=css('--panel');c.fillRect(xr-tw-3*dpr,y-12*dpr,tw+6*dpr,11*dpr);c.fillStyle=css('--nem');c.fillText(t,xr,y-1*dpr)})}
+            c.fillStyle=css('--panel');c.fillRect(xr-tw-3*dpr,y-12*dpr,tw+6*dpr,11*dpr);c.fillStyle=css(t.startsWith('D')?'--fcrd':'--nem');c.fillText(t,xr,y-1*dpr)})}
         c.restore()}]
     }};
 }
@@ -278,11 +370,12 @@ function build(){
   for(const k in plots)plots[k].destroy();plots={};
   const vis=['p','f','s'].filter(k=>show[k]);
   ['p','f','s'].forEach(k=>{$('w-'+k).hidden=!show[k];$('c-'+k).innerHTML=''});
-  const data={p:emOn?[x,p,pn]:[x,p],f:[x,fr],s:[x,soc]};
+  const data={p:[x,p,pd,pn],f:[x,fr],s:[x,soc]};
   vis.forEach((k,j)=>{const el=$('c-'+k);plots[k]=new uPlot(opts(k,el.clientWidth||el.parentNode.clientWidth,j===vis.length-1),data[k],el)});
   setAll(curMin,curMax);
 }
 const redo=()=>{compute();build()};
+let tm;const later=fn=>{clearTimeout(tm);tm=setTimeout(fn,300)};
 document.querySelectorAll('button[data-w]').forEach(b=>b.addEventListener('click',()=>{win=+b.dataset.w;start=win>=86400?0:Math.floor(curMin/win)*win;mark(win);fillStart();setRange()}));
 document.querySelectorAll('button.tog').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.k;
   if(show[k]&&Object.values(show).filter(Boolean).length===1)return;
@@ -292,10 +385,16 @@ $('em-off').addEventListener('click',()=>{emOn=false;$('em-on').setAttribute('ar
 sel.addEventListener('change',()=>{start=+sel.value;setRange()});
 $('prev').addEventListener('click',()=>{start=curMin-Math.min(win,86400);setRange()});
 $('next').addEventListener('click',()=>{start=curMin+Math.min(win,86400);setRange()});
-let tm;['in-p','in-e','in-c','in-s0','in-eta'].forEach(id=>$(id).addEventListener('input',()=>{clearTimeout(tm);tm=setTimeout(redo,300)}));
-$('maxc').addEventListener('click',()=>{$('in-c').value=maxC().toFixed(2);redo()});
-$('reset').addEventListener('click',()=>{$('in-p').value=1;$('in-e').value=2;$('in-c').value=0.74;$('in-s0').value=50;$('in-eta').value=90;redo()});
-compute();fillStart();
+$('jumpd').addEventListener('click',()=>{const c=caps();const iu=fminI,id=fmaxI;
+  const i=(c.CDu>0&&(c.CDd===0||(49.9-fr[iu])>=(fr[id]-50.1)))?iu:id;win=600;mark(600);start=Math.floor(Math.max(0,x[i]-300)/1)*1;fillStart();
+  start=Math.max(0,x[i]-300);setAll(start,start+win)});
+['in-p','in-e'].forEach(id=>$(id).addEventListener('input',()=>later(()=>{applySplit();redo()})));
+['in-s0','in-eta','in-cn','in-cdu','in-cdd'].forEach(id=>$(id).addEventListener('input',()=>later(redo)));
+$('split').addEventListener('input',()=>{applySplit();later(redo)});
+['use-n','use-du','use-dd'].forEach(id=>$(id).addEventListener('change',()=>{syncFields();applySplit();redo()}));
+$('reset').addEventListener('click',()=>{$('in-p').value=1;$('in-e').value=2;$('in-s0').value=50;$('in-eta').value=90;$('split').value=50;
+  ['use-n','use-du','use-dd'].forEach(id=>$(id).checked=true);syncFields();applySplit();redo()});
+syncFields();applySplit();compute();fillStart();
 requestAnimationFrame(build);
 let t;window.addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(build,150)});
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',build);
