@@ -57,8 +57,11 @@ def simulate(fr, P, CAP, S0, RT, CN, CDu, CDd, em, n_day):
     soc_min = np.full(days, 101.0); soc_max = np.full(days, -1.0); soc_end = np.zeros(days)
     thr = np.zeros(days); eN = np.zeros(days); eD = np.zeros(days); eM = np.zeros(days)
     aem_s = np.zeros(days); empty_s = np.zeros(days); full_s = np.zeros(days); nem_s = np.zeros(days); fcrd_s = np.zeros(days)
+    hours = days * 24
+    h_imp = np.zeros(hours); h_exp = np.zeros(hours); h_unavail = np.zeros(hours); h_soc = np.zeros(hours)
     for i in range(days * n_day):
         d = i // n_day
+        h = i // 36000
         f = fr[i]
         if em:
             if CN > 0:
@@ -109,20 +112,26 @@ def simulate(fr, P, CAP, S0, RT, CN, CDu, CDd, em, n_day):
         inA = em and (aemN or aemDu or aemDd)
         if vM != 0: nem_s[d] += 0.1
         if inA: aem_s[d] += 0.1
+        if v > 0: h_exp[h] += v * DT
+        else: h_imp[h] -= v * DT
         if vD != 0: fcrd_s[d] += 0.1
         eN[d] += abs(vN) * DT; eD[d] += abs(vD) * DT; eM[d] += abs(vM) * DT; thr[d] += abs(v) * DT
         E += (-v * ETA if v < 0 else -v / ETA) * DT
         if E <= 0:
             E = 0.0
             if v > 0: empty_s[d] += 0.1
+            if v > 0: h_unavail[h] += 0.1 / 3600
         if E >= CAP:
             E = CAP
             if v < 0: full_s[d] += 0.1
+            if v < 0: h_unavail[h] += 0.1 / 3600
         sc = E / CAP * 100
         if sc < soc_min[d]: soc_min[d] = sc
         if sc > soc_max[d]: soc_max[d] = sc
         soc_end[d] = sc
-    return soc_min, soc_max, soc_end, thr, eN, eD, eM, aem_s, empty_s, full_s, nem_s, fcrd_s
+        h_soc[h] = sc
+        if inA: h_unavail[h] += 0.1 / 3600
+    return soc_min, soc_max, soc_end, thr, eN, eD, eM, aem_s, empty_s, full_s, nem_s, fcrd_s, h_imp, h_exp, h_unavail, h_soc
 
 
 def load_month(folder, cache_dir):
@@ -141,9 +150,9 @@ def load_month(folder, cache_dir):
 def run_mix(fr, days, P, CAP, share, use=(True, True, True), em=True, S0=50.0, RT=0.9, chained=True):
     cn, cdu, cdd = split_caps(P, CAP, share, *use)
     if chained:
-        out = simulate(fr, P, CAP, S0, RT, cn, cdu, cdd, em, N_DAY)
+        out = simulate(fr, P, CAP, S0, RT, cn, cdu, cdd, em, N_DAY)[:12]
     else:  # every day starts from S0
-        parts = [simulate(fr[i * N_DAY:(i + 1) * N_DAY], P, CAP, S0, RT, cn, cdu, cdd, em, N_DAY) for i in range(len(days))]
+        parts = [simulate(fr[i * N_DAY:(i + 1) * N_DAY], P, CAP, S0, RT, cn, cdu, cdd, em, N_DAY)[:12] for i in range(len(days))]
         out = tuple(np.concatenate([p[j] for p in parts]) for j in range(12))
     names = ["soc_min", "soc_max", "soc_end", "throughput_MWh", "fcrn_MWh", "fcrd_MWh", "nem_MWh", "aem_s", "empty_s", "full_s", "nem_s", "fcrd_s"]
     df = pd.DataFrame(dict(zip(names, out)))

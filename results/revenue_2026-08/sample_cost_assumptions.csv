@@ -1,0 +1,7 @@
+key,value,unit,label
+spot_SE1,50.0,EUR/MWh,Spot price SE1 (energy bought and sold)
+spot_SE2,50.0,EUR/MWh,Spot price SE2 (energy bought and sold)
+spot_SE3,50.0,EUR/MWh,Spot price SE3 (energy bought and sold)
+wear_eur_per_mwh,10.0,EUR/MWh,Battery wear per MWh of throughput
+aux_kw_per_mwh,2.5,kW per MWh,"Average auxiliary power (cooling, controls) per MWh installed"
+fee_pct,10.0,%,Aggregator / BRP fee on gross revenue
