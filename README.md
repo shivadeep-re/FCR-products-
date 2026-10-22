@@ -10,6 +10,7 @@ The site is one self-contained HTML page. It plots all 864,000 samples of a day 
 - **Products**: FCR-N, FCR-D up and FCR-D down, alone or combined, with a slider that splits battery power between FCR-N and FCR-D
 - **Charts** (0.1 s, zoomable, linked): total power with separate FCR-N, FCR-D and NEM lines; frequency with the FCR-N band and FCR-D zones marked (optionally the full 49.5–50.5 Hz range); SOC with the SOC points used by FCR-N, used by FCR-D, restored by NEM, and lost (losses and limits) on a second axis. Every line can be hidden.
 - **Scenarios**: save named settings in the browser, load or delete them, and import settings from an exported `.json`
+- **Revenue tab**: gross and net revenue per product mix for 1–30 August 2026 (Svenska kraftnät Mimer prices), for 1–3 h storage and SE1–SE3, with adjustable spot price, wear cost, auxiliary power, aggregator fee and availability; a wear-cost break-even chart; hourly price charts; market size per area; revenue for the current Simulator setup and day; and market benchmarks (Clean Horizon, Montel, Svenska kraftnät).
 - **Export**: results as CSV at 1 s (averaged power and frequency, end-of-second SOC) or the full 0.1 s resolution, plus a summary `.json` holding the settings and all results. On claude.ai this uses the page's download capability; when self-hosted it is a normal browser download.
 
 ## Quick start
@@ -92,6 +93,10 @@ src/template.html        Page source (HTML/CSS/JS); data and date are injected a
 src/vendor/uPlot.min.css uPlot stylesheet (inlined into the page)
 scripts/build_site.py    CSV -> site/index.html (frequency embedded as base64 int16)
 scripts/analyse_month.py Month-wide simulation and worst-day search
+scripts/mix_analysis.py  Month-long product-mix model (numba port of the page)
+scripts/mix_grid.py      Grid of mix x start SOC x storage x energy management
+scripts/revenue.py       Gross revenue and energy flows per mix from Mimer prices
+src/revenue_tab.*        Revenue tab markup and script (data injected at build time)
 results/                 Analysis outputs
 site/index.html          Built page (deployed to GitHub Pages)
 data/                    Raw Fingrid CSVs (not committed)

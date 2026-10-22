@@ -10,7 +10,7 @@
   --dis:#c2410c; --chg:#0e6ba8; --trace:#1f3a4d; --freq:#6d28d9; --soc:#047857; --nem:#c0267a; --fcrd:#d97706; --fcrn:#0891b2; --loss:#64748b; --band:#9aa9b3;
   --empty:rgba(194,65,12,.10); --full:rgba(14,107,168,.10); --aem:rgba(192,38,122,.12);
   --zn:rgba(8,145,178,.07); --zd:rgba(217,119,6,.08);
-  --ok:#047857; --warn:#b45309;
+  --ok:#047857; --warn:#b45309; --rv-gross:rgba(100,116,139,.28);
   --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
 }
@@ -18,12 +18,12 @@
   --bg:#0f161b; --panel:#162028; --fg:#e4ebef; --muted:#93a3ad; --line:#26343e;
   --dis:#fb923c; --chg:#5cb8f0; --trace:#cfdde6; --freq:#b79cf7; --soc:#4ade9b; --nem:#f472b6; --fcrd:#fcd34d; --fcrn:#22d3ee; --loss:#94a3b8; --band:#5d6e79;
   --empty:rgba(251,146,60,.14); --full:rgba(92,184,240,.14); --aem:rgba(244,114,182,.16);
-  --zn:rgba(34,211,238,.07); --zd:rgba(252,211,77,.08); --ok:#4ade9b; --warn:#fbbf24; color-scheme:dark}}
+  --zn:rgba(34,211,238,.07); --zd:rgba(252,211,77,.08); --ok:#4ade9b; --warn:#fbbf24; --rv-gross:rgba(148,163,184,.25); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0f161b; --panel:#162028; --fg:#e4ebef; --muted:#93a3ad; --line:#26343e;
   --dis:#fb923c; --chg:#5cb8f0; --trace:#cfdde6; --freq:#b79cf7; --soc:#4ade9b; --nem:#f472b6; --fcrd:#fcd34d; --fcrn:#22d3ee; --loss:#94a3b8; --band:#5d6e79;
   --empty:rgba(251,146,60,.14); --full:rgba(92,184,240,.14); --aem:rgba(244,114,182,.16);
-  --zn:rgba(34,211,238,.07); --zd:rgba(252,211,77,.08); --ok:#4ade9b; --warn:#fbbf24; color-scheme:dark}
+  --zn:rgba(34,211,238,.07); --zd:rgba(252,211,77,.08); --ok:#4ade9b; --warn:#fbbf24; --rv-gross:rgba(148,163,184,.25); color-scheme:dark}
 html,body{background:var(--bg);color:var(--fg)}
 body{font-family:var(--sans);font-size:15px;line-height:1.5;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 32px}
@@ -90,6 +90,40 @@ button:focus-visible,select:focus-visible,.prod input:focus-visible,input[type=r
 .rules{display:grid;gap:6px;max-width:82ch}
 .rules h3{font-size:.95rem;margin:8px 0 0}
 .rules ul{margin:0;padding-left:18px;color:var(--muted);font-size:.88rem;display:grid;gap:3px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-top:-4px}
+.tabs button{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:8px 14px;font:600 .95rem var(--sans);color:var(--muted)}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--trace)}
+#tab-sim,#tab-rev{display:grid;gap:18px}
+[hidden]{display:none!important}
+.rv-h{font-size:1.1rem;font-weight:600;margin:0}
+.rv-intro{display:grid;gap:4px}
+.rv-sample{font:500 .7rem var(--sans);text-transform:none;letter-spacing:0;color:var(--warn);margin-left:8px}
+.rv-bars{display:grid;gap:6px}
+.rv-bar{display:grid;grid-template-columns:minmax(7rem,14rem) 1fr auto;gap:4px 10px;align-items:center;font-size:.82rem}
+@media (max-width:600px){.rv-bar{grid-template-columns:1fr auto}.rv-bar .rv-track{grid-column:1 / -1;grid-row:2}}
+.rv-bl{overflow-wrap:anywhere}
+.rv-track{position:relative;height:1.8rem}
+.rv-g,.rv-n{position:absolute;left:0;border-radius:4px}
+.rv-g{top:0;height:100%;background:var(--rv-gross)}
+.rv-n{top:25%;height:50%;background:var(--fcrn)}
+.rv-n.neg{background:var(--dis)}
+.rv-bv{white-space:nowrap;font:.8rem var(--mono);font-variant-numeric:tabular-nums;color:var(--muted);text-align:right}
+.rv-bv b{color:var(--fg);font-weight:500}
+.rv-tablewrap{overflow-x:auto}
+.rv-table{border-collapse:collapse;width:100%;font:.8rem var(--mono);font-variant-numeric:tabular-nums}
+.rv-table th,.rv-table td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.rv-table th:first-child{text-align:left;font-family:var(--sans);font-weight:500;white-space:normal;min-width:9rem}
+.rv-table thead th{color:var(--muted);font:500 .72rem var(--sans);text-transform:uppercase;letter-spacing:.05em}
+.rv-table td.rv-cost{color:var(--muted)} .rv-table td.rv-net{font-weight:600}
+.rv-table tr.rv-best>*{background:color-mix(in srgb,var(--fcrn) 10%,transparent)}
+.rv-chart,#rv-price{min-height:240px;width:100%;justify-self:stretch}
+.rv-chart svg{display:block;width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.8rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:14px;height:10px;border-radius:2px;background:var(--c)}
+.legend i.ln{height:3px}
+.rv-stats{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+.rules a{color:var(--chg)}
 .note{font-size:.82rem;color:var(--muted);max-width:82ch;margin:0}
 .note a,.hint a{color:var(--chg)}
 #loading{font-family:var(--mono);color:var(--muted);padding:40px 0;text-align:center}
@@ -99,6 +133,11 @@ button:focus-visible,select:focus-visible,.prod input:focus-visible,input[type=r
     <h1>Battery on FCR&#8209;N and FCR&#8209;D, <span id="day-long">29 August 2026</span></h1>
     <p class="sub">Every 0.1 s sample, 864,000 points a day, with Nordic LER energy management (NEM and AEM). Load your own Fingrid days, run FCR-N, FCR-D or both, split battery power between them, and export the results. Positive power is <span class="dis">discharging</span>, negative is <span class="chg">charging</span>.</p>
   </header>
+  <nav class="tabs" role="tablist" aria-label="Views">
+    <button role="tab" id="tb-sim" aria-selected="true" aria-controls="tab-sim">Simulator</button>
+    <button role="tab" id="tb-rev" aria-selected="false" aria-controls="tab-rev" tabindex="-1">Revenue</button>
+  </nav>
+  <div id="tab-sim" role="tabpanel" aria-labelledby="tb-sim">
 
   <section class="panel" aria-label="Data, scenarios and export">
     <div class="row">
@@ -253,6 +292,116 @@ button:focus-visible,select:focus-visible,.prod input:focus-visible,input[type=r
     </ul>
   </section>
   <p class="note">Sources: ENTSO-E, <a href="https://www.statnett.no/link/fe89e089e1fd4154947ca28e6ea8c3fc.aspx" target="_blank" rel="noopener">Technical Requirements for FCR Provision in the Nordic Synchronous Area v1.1</a> (28 Mar 2025), section 3.5 and Table 10; Energinet, <a href="https://en.energinet.dk/media/r4rbirq2/prequalfication-of-fcr-n-and-fcr-d.pdf" target="_blank" rel="noopener">Prequalification of FCR-N and FCR-D</a> (NEM and AEM thresholds, power shares and energy reservations). Frequency: Fingrid 0.1 s data, times as given in the file (built-in day: <span id="day-iso">2026-08-29</span>). Values outside 49–51 Hz and single-sample spikes are removed and gaps filled with the previous value. SOC is limited to 0–100 %, and losses are split evenly between charging and discharging. Hourly bid changes are not modelled.</p>
+  </div>
+  <div id="tab-rev" role="tabpanel" aria-labelledby="tb-rev" hidden>
+    <section class="panel" aria-label="Revenue setup">
+      <div class="rv-intro">
+        <h2 class="rv-h">Revenue, <span id="rv-period">August 2026</span></h2>
+        <p class="hint">Gross capacity revenue = bid MW × hourly FCR price (Svenska kraftnät Mimer) × hours available. Net subtracts energy at spot, auxiliary power, battery wear and an aggregator fee. Battery operation comes from the same 0.1 s model as the Simulator tab, run over the whole month with NEM and AEM on and SOC carried day to day. FCR prices are the same in SE1, SE2 and SE3.</p>
+      </div>
+      <div class="row">
+        <div class="controls" role="group" aria-label="Battery storage"><span class="lab">1 MW battery with</span>
+          <button class="seg rv-st" data-h="1" aria-pressed="false">1 h</button>
+          <button class="seg rv-st" data-h="1.5" aria-pressed="false">1.5 h</button>
+          <button class="seg rv-st" data-h="2" aria-pressed="true">2 h</button>
+          <button class="seg rv-st" data-h="3" aria-pressed="false">3 h</button></div>
+        <div class="controls" role="group" aria-label="Bidding area"><span class="lab">Area</span>
+          <button class="seg rv-ar" data-a="SE1" aria-pressed="false">SE1</button>
+          <button class="seg rv-ar" data-a="SE2" aria-pressed="false">SE2</button>
+          <button class="seg rv-ar" data-a="SE3" aria-pressed="true">SE3</button></div>
+      </div>
+      <div class="grp">
+        <h2 class="t">Cost assumptions <span class="rv-sample">sample values, change them</span></h2>
+        <div class="row">
+          <div class="fld"><label for="rv-spot1">Spot SE1</label><div class="in"><input id="rv-spot1" type="number" inputmode="decimal" min="-500" max="2000" step="1" value="50"><span class="u">€/MWh</span></div></div>
+          <div class="fld"><label for="rv-spot2">Spot SE2</label><div class="in"><input id="rv-spot2" type="number" inputmode="decimal" min="-500" max="2000" step="1" value="50"><span class="u">€/MWh</span></div></div>
+          <div class="fld"><label for="rv-spot3">Spot SE3</label><div class="in"><input id="rv-spot3" type="number" inputmode="decimal" min="-500" max="2000" step="1" value="50"><span class="u">€/MWh</span></div></div>
+          <div class="fld"><label for="rv-wear">Battery wear</label><div class="in"><input id="rv-wear" type="number" inputmode="decimal" min="0" max="500" step="1" value="10"><span class="u">€/MWh</span></div></div>
+          <div class="fld"><label for="rv-aux">Aux power</label><div class="in"><input id="rv-aux" type="number" inputmode="decimal" min="0" max="50" step="0.5" value="2.5"><span class="u">kW/MWh</span></div></div>
+          <div class="fld"><label for="rv-fee">Aggregator fee</label><div class="in"><input id="rv-fee" type="number" inputmode="decimal" min="0" max="100" step="1" value="10"><span class="u">%</span></div></div>
+          <div class="fld"><label for="rv-avail">Availability</label><div class="in"><input id="rv-avail" type="number" inputmode="decimal" min="0" max="100" step="1" value="100"><span class="u">%</span></div></div>
+          <button id="rv-reset">Reset</button>
+        </div>
+        <span class="hint">Wear is the battery's replacement cost spread over the energy it can cycle in its life. Aux power is cooling and controls per MWh installed, bought at spot. Availability below 100 % removes that share of gross revenue (maintenance, tests, trips).</span>
+      </div>
+    </section>
+
+    <div class="stats rv-stats">
+      <div class="stat"><b id="rv-best-net"></b><span id="rv-best-name">Best mix, net</span></div>
+      <div class="stat"><b class="fn" id="rv-n-net"></b><span>FCR-N only, net</span></div>
+      <div class="stat"><b class="fd" id="rv-d-net"></b><span>FCR-D up + down, net</span></div>
+      <div class="stat"><b id="rv-year"></b><span>Best mix, net per year if every month were like this</span></div>
+      <div class="stat"><b class="nm" id="rv-be"></b><span>Wear cost where FCR-D up + down beats FCR-N only</span></div>
+      <div class="stat"><b class="fd" id="rv-spike"></b><span>FCR-D up revenue from its 6 best hours</span></div>
+    </div>
+
+    <section class="panel" aria-labelledby="rv-bars-h">
+      <h2 class="t" id="rv-bars-h">Gross and net revenue by product mix, 1–30 August</h2>
+      <div class="legend"><span><i style="--c:var(--rv-gross)"></i>Gross</span><span><i style="--c:var(--fcrn)"></i>Net</span><span><i style="--c:var(--dis)"></i>Net below zero</span></div>
+      <div class="rv-bars" id="rv-bars"></div>
+      <div class="rv-tablewrap">
+        <table class="rv-table" id="rv-table">
+          <thead><tr><th scope="col">Mix</th><th scope="col">FCR-N MW</th><th scope="col">FCR-D up MW</th><th scope="col">FCR-D down MW</th><th scope="col">Gross</th><th scope="col">Energy</th><th scope="col">Aux</th><th scope="col">Wear</th><th scope="col">Fee</th><th scope="col">Net</th><th scope="col">Throughput</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="hint">Capacities are the most each mix can bid on this battery under the sizing rules on the Simulator tab. No mix entered AEM or ran empty in August, so it was available every hour unless you lower Availability.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="rv-wear-h">
+      <h2 class="t" id="rv-wear-h">How battery wear cost changes the winner</h2>
+      <div class="legend" id="rv-wear-legend"></div>
+      <div class="rv-chart" id="rv-wear-chart"></div>
+      <p class="hint">FCR-N cycles the battery about 1 time a day on a 2 h battery, FCR-D almost never. The more each MWh of cycling costs, the better FCR-D looks.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="rv-day-h">
+      <h2 class="t" id="rv-day-h">Your Simulator setup on <span id="rv-day-name">this day</span></h2>
+      <div class="stats" id="rv-day-stats">
+        <div class="stat"><b id="rv-dg"></b><span>Gross</span></div>
+        <div class="stat"><b id="rv-de"></b><span>Energy + aux</span></div>
+        <div class="stat"><b id="rv-dw"></b><span>Wear + fee</span></div>
+        <div class="stat"><b id="rv-dn"></b><span>Net for the day</span></div>
+      </div>
+      <p class="hint" id="rv-day-note">Uses the battery, capacities, day and energy management from the Simulator tab, with the costs above and the spot price of the selected area.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="rv-price-h">
+      <h2 class="t" id="rv-price-h">FCR prices, €/MW per hour</h2>
+      <div class="controls" role="group" aria-label="Product">
+        <button class="seg rv-pp" data-p="n" aria-pressed="true">FCR-N</button>
+        <button class="seg rv-pp" data-p="du" aria-pressed="false">FCR-D up</button>
+        <button class="seg rv-pp" data-p="dd" aria-pressed="false">FCR-D down</button>
+        <span class="readout" id="rv-price-ro"></span>
+      </div>
+      <div id="rv-price"></div>
+      <div class="stats" id="rv-psum"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="rv-area-h">
+      <h2 class="t" id="rv-area-h">Market size by area, average contracted MW</h2>
+      <div class="rv-tablewrap"><table class="rv-table" id="rv-areas"><thead><tr><th scope="col">Area</th><th scope="col">FCR-N</th><th scope="col">FCR-D up</th><th scope="col">FCR-D down</th></tr></thead><tbody></tbody></table></div>
+      <p class="hint">The price is the same everywhere, but a 1 MW battery is a much bigger share of SE1 and SE2 than of SE3, so its bids are more likely to move the price there.</p>
+    </section>
+
+    <section class="rules" aria-labelledby="rv-bench-h">
+      <h3 id="rv-bench-h">Is this realistic? Market benchmarks</h3>
+      <ul>
+        <li>Clean Horizon's index for a 2-hour battery in Sweden: <b>€164k/MW/year</b> in June 2026 and <b>€126k/MW/year</b> in July 2026 (−20% after FCR and mFRR capacity prices fell about 30%). That is about €10–14k per MW per month, optimised across FCR, mFRR and spot trading. <a href="https://www.cleanhorizon.com/news/storage-index-july-2026/" target="_blank" rel="noopener">Clean Horizon</a>, <a href="https://www.ess-news.com/2026/08/12/european-bess-revenues-mostly-rise-in-june-with-italy-still-a-standout/" target="_blank" rel="noopener">ESS News</a></li>
+        <li>Montel (2025): a 1 MW / 2 MWh battery in Sweden can earn about <b>€100k/MW/year</b>. <a href="https://montel.energy/resources/blog/battery-storage-market-insights-sweden" target="_blank" rel="noopener">Montel</a></li>
+        <li>Svenska kraftnät reported an average FCR-N price of <b>€29.9/MW</b> per hour for October 2025, with August and September 2025 at similar levels. <a href="https://www.svk.se/4acc2a/siteassets/aktorsportalen/bidra-med-reserver/handel-och-prissattning/marknadsanalys-balanstjanster/manadsrapport-fcr-oktober-2025.pdf" target="_blank" rel="noopener">Svenska kraftnät</a></li>
+        <li>FCR-D prices collapsed in 2024 as prequalified battery capacity (about 600 MW) overtook demand (below 550 MW). <a href="https://montel.energy/resources/blog/battery-storage-market-insights-sweden" target="_blank" rel="noopener">Montel</a>, <a href="https://www.flower.se/insights/market-insight/the-fcr-d-price-is-at-record-lows-now-what/" target="_blank" rel="noopener">Flower</a></li>
+      </ul>
+      <h3>What this model leaves out</h3>
+      <ul>
+        <li>It assumes every bid is accepted at the hourly price and that the battery does not move the price itself.</li>
+        <li>Grid fees on the auxiliary supply, insurance, O&amp;M, delivery penalties and capital costs are not included, so net is an operating margin, not profit.</li>
+        <li>Energy activated for FCR is valued at spot; the actual settlement may use imbalance prices.</li>
+        <li>One month of prices: summer months are usually lower than winter, and prices swing a lot from month to month.</li>
+      </ul>
+    </section>
+  </div>
+
 </main>
 <script src="https://cdn.jsdelivr.net/npm/uplot@1.6.30/dist/uPlot.iife.min.js"></script>
 <script>
@@ -586,9 +735,140 @@ $('ex-csv').addEventListener('click',async()=>{say('Preparing CSV…');await new
   await saveFile('fcr-sim_'+tag()+'_'+(R===1?'0.1s':'1s')+'.csv',new Blob(parts,{type:'text/csv'}))});
 $('ex-json').addEventListener('click',()=>{const out={generated:new Date().toISOString(),model:'FCR battery simulator (static FCR-N/FCR-D, Nordic NEM/AEM)',day:curDay,settings:getSettings(),results:stats};
   saveFile('fcr-sim_'+tag()+'_summary.json',JSON.stringify(out,null,2))});
+/* ---------- revenue tab ---------- */
+const REV={"period":["2026-08-01","2026-08-30"],"scenarios":[{"mix_id":"n_only","mix":"FCR-N only","storage_h":1.0,"energy_MWh":1.0,"c_fcrn_MW":0.5,"c_fcrd_up_MW":0.0,"c_fcrd_down_MW":0.0,"gross_EUR":6741.0,"import_MWh":41.654,"export_MWh":37.436,"throughput_MWh":79.091,"soc_change_MWh":0.055,"hours":720},{"mix_id":"n80_d20","mix":"80/20 FCR-N / FCR-D","storage_h":1.0,"energy_MWh":1.0,"c_fcrn_MW":0.45,"c_fcrd_up_MW":0.12,"c_fcrd_down_MW":0.12,"gross_EUR":7043.0,"import_MWh":37.474,"export_MWh":33.689,"throughput_MWh":71.162,"soc_change_MWh":0.04,"hours":720},{"mix_id":"n60_d40","mix":"60/40 FCR-N / FCR-D","storage_h":1.0,"energy_MWh":1.0,"c_fcrn_MW":0.4,"c_fcrd_up_MW":0.29,"c_fcrd_down_MW":0.29,"gross_EUR":7751.0,"import_MWh":33.312,"export_MWh":29.942,"throughput_MWh":63.254,"soc_change_MWh":0.041,"hours":720},{"mix_id":"n50_d50","mix":"50/50 FCR-N / FCR-D","storage_h":1.0,"energy_MWh":1.0,"c_fcrn_MW":0.36,"c_fcrd_up_MW":0.4,"c_fcrd_down_MW":0.4,"gross_EUR":8107.0,"import_MWh":29.983,"export_MWh":26.953,"throughput_MWh":56.936,"soc_change_MWh":0.033,"hours":720},{"mix_id":"n40_d60","mix":"40/60 FCR-N / FCR-D","storage_h":1.0,"energy_MWh":1.0,"c_fcrn_MW":0.29,"c_fcrd_up_MW":0.5,"c_fcrd_down_MW":0.5,"gross_EUR":7976.0,"import_MWh":24.124,"export_MWh":21.722,"throughput_MWh":45.846,"soc_change_MWh":-0.011,"hours":720},{"mix_id":"n20_d80","mix":"20/80 FCR-N / FCR-D","storage_h":1.0,"energy_MWh":1.0,"c_fcrn_MW":0.14,"c_fcrd_up_MW":0.66,"c_fcrd_down_MW":0.66,"gross_EUR":7255.0,"import_MWh":11.564,"export_MWh":10.526,"throughput_MWh":22.09,"soc_change_MWh":-0.125,"hours":720},{"mix_id":"d_both","mix":"FCR-D up and down","storage_h":1.0,"energy_MWh":1.0,"c_fcrn_MW":0.0,"c_fcrd_up_MW":0.83,"c_fcrd_down_MW":0.83,"gross_EUR":6750.0,"import_MWh":0.027,"export_MWh":0.041,"throughput_MWh":0.068,"soc_change_MWh":-0.017,"hours":720},{"mix_id":"d_up","mix":"FCR-D up only","storage_h":1.0,"energy_MWh":1.0,"c_fcrn_MW":0.0,"c_fcrd_up_MW":1.0,"c_fcrd_down_MW":0.0,"gross_EUR":6257.0,"import_MWh":0.0,"export_MWh":0.049,"throughput_MWh":0.049,"soc_change_MWh":-0.052,"hours":720},{"mix_id":"d_down","mix":"FCR-D down only","storage_h":1.0,"energy_MWh":1.0,"c_fcrn_MW":0.0,"c_fcrd_up_MW":0.0,"c_fcrd_down_MW":1.0,"gross_EUR":1876.0,"import_MWh":0.033,"export_MWh":0.0,"throughput_MWh":0.033,"soc_change_MWh":0.031,"hours":720},{"mix_id":"n50_dup","mix":"50/50 FCR-N / FCR-D up","storage_h":1.0,"energy_MWh":1.0,"c_fcrn_MW":0.37,"c_fcrd_up_MW":0.5,"c_fcrd_down_MW":0.0,"gross_EUR":8117.0,"import_MWh":30.87,"export_MWh":27.71,"throughput_MWh":58.58,"soc_change_MWh":0.077,"hours":720},{"mix_id":"n_only","mix":"FCR-N only","storage_h":1.5,"energy_MWh":1.5,"c_fcrn_MW":0.74,"c_fcrd_up_MW":0.0,"c_fcrd_down_MW":0.0,"gross_EUR":9977.0,"import_MWh":61.611,"export_MWh":55.382,"throughput_MWh":116.992,"soc_change_MWh":0.072,"hours":720},{"mix_id":"n80_d20","mix":"80/20 FCR-N / FCR-D","storage_h":1.5,"energy_MWh":1.5,"c_fcrn_MW":0.59,"c_fcrd_up_MW":0.16,"c_fcrd_down_MW":0.16,"gross_EUR":9256.0,"import_MWh":49.004,"export_MWh":44.142,"throughput_MWh":93.146,"soc_change_MWh":-0.041,"hours":720},{"mix_id":"n60_d40","mix":"60/40 FCR-N / FCR-D","storage_h":1.5,"energy_MWh":1.5,"c_fcrn_MW":0.44,"c_fcrd_up_MW":0.33,"c_fcrd_down_MW":0.33,"gross_EUR":8616.0,"import_MWh":36.467,"export_MWh":32.964,"throughput_MWh":69.431,"soc_change_MWh":-0.151,"hours":720},{"mix_id":"n50_d50","mix":"50/50 FCR-N / FCR-D","storage_h":1.5,"energy_MWh":1.5,"c_fcrn_MW":0.37,"c_fcrd_up_MW":0.41,"c_fcrd_down_MW":0.41,"gross_EUR":8323.0,"import_MWh":30.623,"export_MWh":27.752,"throughput_MWh":58.375,"soc_change_MWh":-0.202,"hours":720},{"mix_id":"n40_d60","mix":"40/60 FCR-N / FCR-D","storage_h":1.5,"energy_MWh":1.5,"c_fcrn_MW":0.29,"c_fcrd_up_MW":0.5,"c_fcrd_down_MW":0.5,"gross_EUR":7976.0,"import_MWh":23.911,"export_MWh":21.768,"throughput_MWh":45.68,"soc_change_MWh":-0.261,"hours":720},{"mix_id":"n20_d80","mix":"20/80 FCR-N / FCR-D","storage_h":1.5,"energy_MWh":1.5,"c_fcrn_MW":0.14,"c_fcrd_up_MW":0.66,"c_fcrd_down_MW":0.66,"gross_EUR":7255.0,"import_MWh":11.391,"export_MWh":10.607,"throughput_MWh":21.998,"soc_change_MWh":-0.375,"hours":720},{"mix_id":"d_both","mix":"FCR-D up and down","storage_h":1.5,"energy_MWh":1.5,"c_fcrn_MW":0.0,"c_fcrd_up_MW":0.83,"c_fcrd_down_MW":0.83,"gross_EUR":6750.0,"import_MWh":0.027,"export_MWh":0.041,"throughput_MWh":0.068,"soc_change_MWh":-0.017,"hours":720},{"mix_id":"d_up","mix":"FCR-D up only","storage_h":1.5,"energy_MWh":1.5,"c_fcrn_MW":0.0,"c_fcrd_up_MW":1.0,"c_fcrd_down_MW":0.0,"gross_EUR":6257.0,"import_MWh":0.0,"export_MWh":0.049,"throughput_MWh":0.049,"soc_change_MWh":-0.052,"hours":720},{"mix_id":"d_down","mix":"FCR-D down only","storage_h":1.5,"energy_MWh":1.5,"c_fcrn_MW":0.0,"c_fcrd_up_MW":0.0,"c_fcrd_down_MW":1.0,"gross_EUR":1876.0,"import_MWh":0.033,"export_MWh":0.0,"throughput_MWh":0.033,"soc_change_MWh":0.031,"hours":720},{"mix_id":"n50_dup","mix":"50/50 FCR-N / FCR-D up","storage_h":1.5,"energy_MWh":1.5,"c_fcrn_MW":0.37,"c_fcrd_up_MW":0.5,"c_fcrd_down_MW":0.0,"gross_EUR":8117.0,"import_MWh":30.638,"export_MWh":27.738,"throughput_MWh":58.376,"soc_change_MWh":-0.173,"hours":720},{"mix_id":"n_only","mix":"FCR-N only","storage_h":2.0,"energy_MWh":2.0,"c_fcrn_MW":0.74,"c_fcrd_up_MW":0.0,"c_fcrd_down_MW":0.0,"gross_EUR":9977.0,"import_MWh":61.433,"export_MWh":55.459,"throughput_MWh":116.892,"soc_change_MWh":-0.178,"hours":720},{"mix_id":"n80_d20","mix":"80/20 FCR-N / FCR-D","storage_h":2.0,"energy_MWh":2.0,"c_fcrn_MW":0.59,"c_fcrd_up_MW":0.16,"c_fcrd_down_MW":0.16,"gross_EUR":9256.0,"import_MWh":48.833,"export_MWh":44.226,"throughput_MWh":93.06,"soc_change_MWh":-0.291,"hours":720},{"mix_id":"n60_d40","mix":"60/40 FCR-N / FCR-D","storage_h":2.0,"energy_MWh":2.0,"c_fcrn_MW":0.44,"c_fcrd_up_MW":0.33,"c_fcrd_down_MW":0.33,"gross_EUR":8616.0,"import_MWh":36.26,"export_MWh":33.015,"throughput_MWh":69.276,"soc_change_MWh":-0.401,"hours":720},{"mix_id":"n50_d50","mix":"50/50 FCR-N / FCR-D","storage_h":2.0,"energy_MWh":2.0,"c_fcrn_MW":0.37,"c_fcrd_up_MW":0.41,"c_fcrd_down_MW":0.41,"gross_EUR":8323.0,"import_MWh":30.437,"export_MWh":27.823,"throughput_MWh":58.26,"soc_change_MWh":-0.452,"hours":720},{"mix_id":"n40_d60","mix":"40/60 FCR-N / FCR-D","storage_h":2.0,"energy_MWh":2.0,"c_fcrn_MW":0.29,"c_fcrd_up_MW":0.5,"c_fcrd_down_MW":0.5,"gross_EUR":7976.0,"import_MWh":23.742,"export_MWh":21.853,"throughput_MWh":45.596,"soc_change_MWh":-0.511,"hours":720},{"mix_id":"n20_d80","mix":"20/80 FCR-N / FCR-D","storage_h":2.0,"energy_MWh":2.0,"c_fcrn_MW":0.14,"c_fcrd_up_MW":0.66,"c_fcrd_down_MW":0.66,"gross_EUR":7255.0,"import_MWh":11.215,"export_MWh":10.686,"throughput_MWh":21.902,"soc_change_MWh":-0.625,"hours":720},{"mix_id":"d_both","mix":"FCR-D up and down","storage_h":2.0,"energy_MWh":2.0,"c_fcrn_MW":0.0,"c_fcrd_up_MW":0.83,"c_fcrd_down_MW":0.83,"gross_EUR":6750.0,"import_MWh":0.027,"export_MWh":0.041,"throughput_MWh":0.068,"soc_change_MWh":-0.017,"hours":720},{"mix_id":"d_up","mix":"FCR-D up only","storage_h":2.0,"energy_MWh":2.0,"c_fcrn_MW":0.0,"c_fcrd_up_MW":1.0,"c_fcrd_down_MW":0.0,"gross_EUR":6257.0,"import_MWh":0.0,"export_MWh":0.049,"throughput_MWh":0.049,"soc_change_MWh":-0.052,"hours":720},{"mix_id":"d_down","mix":"FCR-D down only","storage_h":2.0,"energy_MWh":2.0,"c_fcrn_MW":0.0,"c_fcrd_up_MW":0.0,"c_fcrd_down_MW":1.0,"gross_EUR":1876.0,"import_MWh":0.033,"export_MWh":0.0,"throughput_MWh":0.033,"soc_change_MWh":0.031,"hours":720},{"mix_id":"n50_dup","mix":"50/50 FCR-N / FCR-D up","storage_h":2.0,"energy_MWh":2.0,"c_fcrn_MW":0.37,"c_fcrd_up_MW":0.5,"c_fcrd_down_MW":0.0,"gross_EUR":8117.0,"import_MWh":30.459,"export_MWh":27.814,"throughput_MWh":58.273,"soc_change_MWh":-0.423,"hours":720},{"mix_id":"n_only","mix":"FCR-N only","storage_h":3.0,"energy_MWh":3.0,"c_fcrn_MW":0.74,"c_fcrd_up_MW":0.0,"c_fcrd_down_MW":0.0,"gross_EUR":9977.0,"import_MWh":60.96,"export_MWh":55.508,"throughput_MWh":116.468,"soc_change_MWh":-0.678,"hours":720},{"mix_id":"n80_d20","mix":"80/20 FCR-N / FCR-D","storage_h":3.0,"energy_MWh":3.0,"c_fcrn_MW":0.59,"c_fcrd_up_MW":0.16,"c_fcrd_down_MW":0.16,"gross_EUR":9256.0,"import_MWh":48.479,"export_MWh":44.382,"throughput_MWh":92.861,"soc_change_MWh":-0.791,"hours":720},{"mix_id":"n60_d40","mix":"60/40 FCR-N / FCR-D","storage_h":3.0,"energy_MWh":3.0,"c_fcrn_MW":0.44,"c_fcrd_up_MW":0.33,"c_fcrd_down_MW":0.33,"gross_EUR":8616.0,"import_MWh":35.932,"export_MWh":33.194,"throughput_MWh":69.127,"soc_change_MWh":-0.901,"hours":720},{"mix_id":"n50_d50","mix":"50/50 FCR-N / FCR-D","storage_h":3.0,"energy_MWh":3.0,"c_fcrn_MW":0.37,"c_fcrd_up_MW":0.41,"c_fcrd_down_MW":0.41,"gross_EUR":8323.0,"import_MWh":30.058,"export_MWh":27.956,"throughput_MWh":58.013,"soc_change_MWh":-0.952,"hours":720},{"mix_id":"n40_d60","mix":"40/60 FCR-N / FCR-D","storage_h":3.0,"energy_MWh":3.0,"c_fcrn_MW":0.29,"c_fcrd_up_MW":0.5,"c_fcrd_down_MW":0.5,"gross_EUR":7976.0,"import_MWh":23.417,"export_MWh":22.035,"throughput_MWh":45.452,"soc_change_MWh":-1.011,"hours":720},{"mix_id":"n20_d80","mix":"20/80 FCR-N / FCR-D","storage_h":3.0,"energy_MWh":3.0,"c_fcrn_MW":0.14,"c_fcrd_up_MW":0.66,"c_fcrd_down_MW":0.66,"gross_EUR":7255.0,"import_MWh":10.881,"export_MWh":10.86,"throughput_MWh":21.74,"soc_change_MWh":-1.125,"hours":720},{"mix_id":"d_both","mix":"FCR-D up and down","storage_h":3.0,"energy_MWh":3.0,"c_fcrn_MW":0.0,"c_fcrd_up_MW":0.83,"c_fcrd_down_MW":0.83,"gross_EUR":6750.0,"import_MWh":0.027,"export_MWh":0.041,"throughput_MWh":0.068,"soc_change_MWh":-0.017,"hours":720},{"mix_id":"d_up","mix":"FCR-D up only","storage_h":3.0,"energy_MWh":3.0,"c_fcrn_MW":0.0,"c_fcrd_up_MW":1.0,"c_fcrd_down_MW":0.0,"gross_EUR":6257.0,"import_MWh":0.0,"export_MWh":0.049,"throughput_MWh":0.049,"soc_change_MWh":-0.052,"hours":720},{"mix_id":"d_down","mix":"FCR-D down only","storage_h":3.0,"energy_MWh":3.0,"c_fcrn_MW":0.0,"c_fcrd_up_MW":0.0,"c_fcrd_down_MW":1.0,"gross_EUR":1876.0,"import_MWh":0.033,"export_MWh":0.0,"throughput_MWh":0.033,"soc_change_MWh":0.031,"hours":720},{"mix_id":"n50_dup","mix":"50/50 FCR-N / FCR-D up","storage_h":3.0,"energy_MWh":3.0,"c_fcrn_MW":0.37,"c_fcrd_up_MW":0.5,"c_fcrd_down_MW":0.0,"gross_EUR":8117.0,"import_MWh":30.083,"export_MWh":27.95,"throughput_MWh":58.034,"soc_change_MWh":-0.923,"hours":720}],"prices":{"t0":"2026-08-01 00:00","n":[65.6,34.67,34.067,34.697,35.663,34.711,18.974,25.766,27.189,27.189,35.692,35.634,65.917,65.871,65.917,78.158,67.554,67.554,32.093,32.286,32.286,26.586,26.0,26.525,19.154,18.862,18.538,17.092,18.155,17.392,28.013,18.663,18.663,21.682,23.777,25.037,24.034,24.5,25.292,27.169,21.75,18.608,18.533,20.417,22.78,18.612,17.7,18.601,20.18,16.799,16.625,13.252,12.866,13.15,15.528,13.996,15.901,13.26,13.642,19.571,20.0,25.315,20.0,18.075,17.854,14.196,16.018,13.736,14.513,14.652,14.396,16.096,27.008,27.667,27.667,29.167,26.866,21.154,35.751,45.826,38.877,37.64,28.904,29.193,29.189,29.175,29.185,29.208,29.179,30.976,16.123,19.128,16.836,17.689,19.833,23.546,30.67,30.67,35.725,27.09,33.91,33.523,35.211,44.993,35.211,32.377,27.894,27.897,33.672,26.144,28.217,28.217,22.47,27.017,28.052,27.187,34.344,40.66,32.344,30.67,19.965,14.551,14.482,14.551,13.742,14.112,13.39,19.225,15.653,19.488,20.225,20.823,18.489,17.41,20.225,18.183,20.04,18.15,18.15,19.625,19.918,20.049,20.997,20.613,20.697,30.376,20.78,20.78,20.737,25.077,24.626,20.592,20.592,20.592,20.839,26.724,22.41,22.452,21.993,30.186,25.152,26.28,21.016,20.297,19.776,17.301,18.467,18.205,20.773,25.627,22.557,19.088,18.779,18.046,20.59,20.088,23.523,24.346,21.465,20.853,20.613,20.909,20.599,26.418,29.204,26.652,20.059,19.772,20.273,21.36,41.869,21.606,15.821,18.305,16.192,14.512,14.953,14.647,16.234,17.906,17.712,14.417,17.562,17.068,21.756,19.855,19.855,19.803,20.707,19.837,17.967,16.855,16.837,18.723,18.422,19.164,16.04,21.124,20.454,14.908,14.955,16.676,19.146,11.499,11.277,11.023,10.752,11.0,12.52,12.282,12.686,11.878,12.016,11.494,11.92,11.418,11.29,12.256,12.616,12.256,14.398,14.096,14.644,13.344,14.644,13.354,14.322,13.335,14.844,20.356,16.074,16.074,14.785,14.883,14.933,15.528,15.033,14.009,12.627,12.768,12.1,13.228,12.774,12.322,21.192,18.989,19.612,19.776,19.801,16.52,18.571,18.537,17.793,15.776,16.768,14.972,16.109,15.978,17.014,16.967,19.62,24.514,27.577,32.589,32.376,35.031,31.53,34.888,11.765,12.024,12.602,11.121,12.783,12.76,17.949,18.538,22.707,17.741,16.781,16.192,12.959,13.576,14.185,17.746,22.832,23.577,22.773,17.909,16.377,27.981,23.599,25.193,13.867,13.635,12.705,12.957,12.418,13.669,13.096,13.76,14.008,13.76,12.768,13.87,15.341,15.438,17.741,17.741,17.837,17.515,14.325,13.567,13.644,23.37,20.741,20.515,16.645,14.442,14.037,13.125,12.816,12.946,18.611,15.015,15.544,17.748,17.98,17.498,16.689,16.654,16.999,16.999,17.243,14.174,13.312,15.019,14.0,15.462,14.854,16.524,14.008,14.008,14.26,12.278,14.008,13.87,14.26,15.123,13.059,13.345,13.548,13.644,13.87,13.87,11.776,14.053,13.494,13.098,12.547,12.256,13.241,11.638,11.603,11.638,13.281,12.78,13.115,15.0,14.512,13.509,14.576,15.805,13.983,13.639,12.38,12.384,12.632,12.435,13.87,12.961,13.211,13.637,13.206,13.281,13.328,14.075,13.938,14.155,13.414,12.349,12.472,12.078,12.264,13.234,13.512,12.36,13.153,11.009,12.602,11.914,12.494,12.441,12.997,18.232,24.24,24.736,20.0,14.429,17.398,22.711,22.479,17.814,21.192,18.87,20.0,16.723,18.002,18.512,19.832,19.627,17.971,20.743,18.801,19.451,22.445,21.115,25.923,21.52,19.765,19.776,19.751,21.045,18.513,24.397,24.397,44.654,16.14,13.761,15.0,12.433,12.026,11.776,12.28,13.092,13.024,14.133,13.012,12.038,13.029,14.648,14.587,15.046,15.265,15.021,13.625,13.294,13.773,20.1,18.066,18.87,25.048,25.447,24.075,22.699,23.022,24.075,19.424,18.695,20.621,21.732,21.758,20.595,18.817,17.092,17.283,20.758,20.925,21.355,25.279,25.453,22.27,25.949,24.772,29.614,17.548,14.418,15.768,12.145,13.441,14.129,13.977,14.108,14.429,13.492,11.874,14.57,12.28,13.025,13.198,15.933,14.512,14.512,13.512,13.465,13.388,14.238,15.467,16.267,14.322,13.082,13.229,13.023,12.895,13.572,14.256,14.256,14.26,14.322,13.76,13.76,14.008,13.953,14.162,14.075,16.869,14.075,14.224,14.075,14.322,15.678,15.678,18.0,15.776,15.11,16.333,12.193,13.38,13.097,12.73,12.008,12.557,11.407,11.785,13.548,13.872,13.638,13.512,16.368,13.944,13.34,13.662,14.205,12.682,15.096,15.568,17.459,14.03,14.03,13.945,13.333,13.137,13.076,18.858,21.455,20.28,21.055,17.623,13.529,14.331,13.406,13.918,13.543,14.449,14.314,14.984,17.734,16.135,25.797,23.984,24.545,16.302,15.31,15.558,15.204,20.289,16.991,17.52,18.362,16.818,16.685,19.606,19.8,19.547,20.027,24.928,25.071,22.03,22.785,20.297,20.377,19.134,20.588,22.256,23.76,18.329,20.549,18.379,16.174,21.726,18.571,22.445,22.278,21.125,17.407,16.927,17.129,17.878,18.089,23.487,32.742,23.322,22.679,18.841,18.045,18.15,25.0,24.079,23.148,17.701,13.81,13.915,13.938,20.226,18.325,16.67,17.972,20.061,15.2,18.389,14.774,14.093,16.152,19.515,20.946,16.522,15.251,13.521,13.64,14.287,17.408,17.168,17.906,13.281,12.901,12.768,12.78,12.41,12.397,13.529,12.511,13.115,11.792,12.845,12.831,19.193,15.899,19.903,14.79,15.724,22.198,16.528,14.395,14.452,15.041,15.215,18.808,13.399,11.963,12.148,14.008,16.13,14.008,12.261,13.043,13.891,13.459,13.87,14.022,14.008,14.096,17.642,16.617,18.808,15.76,13.87,12.735,12.632,12.818,12.293,11.461],"du":[10.85,4.291,4.387,8.416,4.291,10.814,9.575,9.761,10.85,12.581,10.833,10.798,12.503,8.545,8.462,7.555,4.227,4.285,4.359,5.262,8.416,10.814,8.382,10.85,4.167,4.076,4.076,3.951,3.827,4.251,4.175,4.806,10.784,7.173,7.939,8.419,8.378,8.307,5.837,4.81,8.47,4.178,4.26,4.167,4.673,5.643,5.737,5.163,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.53,1.0,1.0,1.419,1.493,1.025,1.388,1.443,1.0,1.0,1.757,1.767,1.82,3.79,1.722,6.407,4.092,4.881,4.149,4.144,10.381,8.019,6.892,6.709,28.64,12.048,12.031,10.372,8.093,8.717,12.66,10.372,8.104,633.099,633.039,633.045,633.045,633.039,664.853,0.774,0.774,0.774,0.928,0.774,0.785,0.774,0.774,0.774,0.985,0.985,1.081,0.955,1.058,0.774,0.875,0.925,0.925,0.925,0.977,0.985,0.992,0.985,0.977,2.483,2.423,1.449,1.966,1.831,2.476,2.521,2.476,2.798,3.01,3.337,3.982,4.484,3.3,3.058,2.483,2.641,1.905,2.74,2.765,3.899,4.963,3.982,2.476,3.989,3.982,7.698,3.223,3.899,3.974,3.921,3.974,4.364,4.566,9.248,5.48,4.581,3.989,3.982,7.884,4.731,3.34,3.921,3.982,4.446,5.255,3.974,7.653,4.47,2.275,2.864,2.144,2.526,2.491,3.887,3.924,7.581,3.899,3.834,3.321,3.222,2.906,3.054,2.701,2.844,2.481,3.966,3.982,4.446,3.892,3.087,3.229,2.939,2.939,3.021,2.723,2.602,2.617,3.351,3.688,3.95,3.258,3.996,4.633,4.402,3.95,3.914,3.608,3.348,3.541,3.373,3.198,4.29,3.433,2.939,2.695,4.498,3.667,3.959,2.698,3.003,3.165,4.461,3.771,3.771,3.178,3.952,4.273,4.04,3.758,3.964,3.441,2.989,2.785,4.091,4.105,4.671,4.895,4.274,4.091,3.894,2.867,2.635,2.802,2.935,2.747,3.869,3.765,4.739,5.968,5.908,5.861,3.967,3.952,3.883,2.685,3.124,3.266,3.472,3.922,4.634,4.731,4.731,4.235,2.423,2.423,2.483,2.071,2.402,2.041,2.45,2.483,2.543,2.85,3.973,3.974,3.225,3.03,3.09,2.476,2.423,2.373,3.15,3.188,2.865,3.158,2.484,2.423,3.173,3.15,3.202,2.521,2.85,3.15,4.364,4.643,4.454,3.135,3.09,3.022,3.105,3.09,2.872,2.273,2.505,2.483,3.051,3.974,4.846,6.067,4.007,3.989,3.109,2.447,2.42,3.018,2.015,2.42,2.473,3.159,3.079,2.712,2.693,3.225,3.142,2.579,2.886,2.423,2.475,2.48,2.854,3.909,3.394,3.984,3.902,3.146,3.988,3.689,3.539,3.164,3.239,3.089,3.771,3.943,4.004,4.633,6.065,6.058,2.871,2.656,2.691,3.061,3.424,3.207,3.982,3.982,3.989,3.989,3.988,3.898,2.423,2.273,2.679,2.893,3.028,2.916,3.337,3.13,3.148,3.148,3.551,3.397,3.551,3.176,3.297,2.923,3.148,2.653,3.621,2.986,3.761,3.298,2.549,2.496,2.131,1.249,1.846,1.764,1.669,1.324,2.373,2.352,2.686,2.362,2.335,2.753,2.523,2.373,1.878,1.814,2.017,1.644,2.573,3.348,2.573,2.548,1.844,2.698,3.229,3.168,2.898,1.98,2.493,3.115,1.892,2.83,2.306,3.148,3.418,3.984,3.964,3.229,2.23,2.496,2.519,1.874,2.741,3.86,4.545,3.957,3.298,3.298,2.497,2.857,2.175,1.741,1.734,1.746,2.745,2.879,3.106,3.193,3.92,3.433,3.17,2.694,2.971,3.389,2.28,1.816,2.752,3.988,3.486,3.336,3.02,3.769,3.547,3.022,3.022,2.813,2.611,2.858,2.214,2.528,2.873,2.91,3.09,3.24,2.708,2.731,2.019,2.079,2.183,1.734,3.172,3.24,3.247,3.899,3.247,1.749,3.24,2.491,2.363,2.079,2.116,2.753,3.382,3.33,3.615,3.997,3.24,3.989,3.24,2.873,3.09,2.356,2.865,2.416,3.337,3.989,3.994,4.057,4.007,3.712,4.009,3.209,3.025,3.233,3.081,2.856,3.925,3.958,4.583,4.675,4.398,4.605,3.984,3.976,3.243,2.996,3.168,2.773,3.374,3.979,4.037,3.979,3.979,3.979,2.798,2.647,2.647,3.113,2.193,2.375,2.902,3.098,3.296,3.06,3.141,3.274,2.62,2.646,2.62,2.341,2.408,2.0,1.779,2.71,3.13,2.798,2.291,2.468,1.545,2.358,1.669,1.54,1.596,1.508,2.377,5.106,4.063,3.091,2.67,3.022,3.773,2.798,3.039,1.674,1.899,1.858,2.301,3.799,4.447,4.479,3.348,3.4,1.523,2.67,1.793,1.808,1.809,1.644,2.145,3.221,3.292,3.337,3.624,3.244,3.168,3.019,2.668,1.869,2.265,1.817,3.247,3.583,3.282,2.09,3.258,1.749,1.996,1.779,1.742,1.562,1.641,1.734,2.116,2.636,3.942,4.205,3.123,3.007,2.679,2.442,2.712,2.016,2.037,2.865,3.25,3.467,3.373,4.007,3.258,2.134,2.021,1.523,1.523,2.109,1.742,1.734,2.872,3.0,3.799,4.247,4.247,3.7,2.865,2.79,2.663,1.742,1.742,2.116,3.997,4.007,4.007,3.332,3.258,4.007,3.112,1.997,1.309,3.205,1.165,1.06,1.283,2.108,2.921,2.602,3.313,3.478,3.239,2.707,2.243,2.011,2.115,1.696,2.849,3.239,3.473,3.096,2.133,2.086,2.022,2.87,2.87,2.12,2.866,3.09,2.825,3.087,3.697,3.251,3.238,3.222,3.037,2.538,2.642,2.11,2.109,2.116,2.592,3.125,3.987,3.983,3.23,3.272,2.273,2.261,2.417,2.162,2.62,2.455,3.033,3.199,3.504,3.288,3.749,3.643,3.562,3.489,2.604,2.099,2.546,2.249,2.825,3.641,2.261,1.758,1.925,2.824],"dd":[25.382,10.811,4.888,4.159,4.159,4.989,4.159,3.899,3.101,4.247,10.021,15.34,5.128,6.812,4.234,5.293,9.993,6.467,4.238,4.417,4.338,3.24,3.331,4.314,5.084,6.885,5.103,4.981,4.993,5.027,5.146,3.421,3.702,5.139,8.546,9.737,8.284,8.628,8.193,11.066,5.755,4.764,5.084,4.634,4.028,2.643,5.172,4.328,1.364,1.368,1.373,1.0,1.378,1.348,1.182,1.175,1.371,1.0,1.0,1.187,1.35,1.404,1.373,1.371,1.501,1.515,1.543,1.529,1.373,1.38,1.183,1.38,9.234,2.994,3.049,3.044,3.09,4.954,3.011,2.97,2.864,4.152,4.94,9.582,4.597,4.684,4.403,3.508,4.022,4.081,4.278,3.785,3.628,2.655,2.576,2.663,2.626,2.348,2.316,2.647,2.647,2.269,2.268,2.648,2.421,2.064,2.056,2.393,2.273,2.426,1.825,1.927,2.501,2.872,2.373,2.494,2.723,1.49,1.304,2.094,3.818,2.872,2.665,2.737,3.05,3.089,2.456,2.347,2.268,2.537,2.517,2.055,2.053,2.06,3.131,3.196,3.712,4.363,3.24,3.482,3.854,2.648,2.498,2.648,3.483,3.688,3.688,3.299,3.771,3.771,3.486,3.967,3.812,2.647,2.272,2.422,2.422,2.422,1.83,1.83,2.872,3.022,3.781,3.815,3.585,3.165,3.098,3.257,3.022,2.535,1.523,1.523,1.523,1.523,1.524,1.779,1.405,0.777,0.774,0.777,1.115,0.922,3.091,3.013,2.872,1.523,1.822,2.339,2.289,1.58,1.632,1.749,2.871,1.148,0.984,0.856,1.148,1.747,2.301,2.096,3.078,1.0,0.833,1.253,1.0,1.253,1.0,1.015,3.307,2.872,2.872,2.939,2.152,1.419,2.404,2.891,3.427,2.951,2.413,3.111,4.028,3.796,3.227,3.549,2.964,4.386,3.302,4.276,3.997,3.914,2.959,3.255,3.247,2.873,2.678,3.124,2.461,2.908,2.909,3.235,7.517,5.179,5.097,4.423,4.185,4.161,4.774,3.354,3.368,2.868,2.802,2.957,3.232,3.597,3.597,4.614,6.368,6.665,4.819,4.533,4.846,3.269,3.371,3.997,2.867,3.657,3.928,3.989,3.92,3.907,2.054,2.106,1.747,0.855,0.932,2.065,2.112,1.521,1.521,1.841,2.067,2.322,2.411,1.949,1.501,1.329,2.16,1.628,2.34,2.299,2.1,2.119,2.934,2.898,2.198,1.74,1.523,1.523,1.898,2.272,2.272,2.1,2.119,2.643,2.539,2.637,2.231,2.305,1.824,1.965,1.418,1.972,1.261,0.887,0.924,1.456,1.254,1.074,0.887,1.15,0.902,0.887,1.122,0.879,0.887,0.887,0.887,0.999,1.149,1.111,1.425,1.275,0.896,0.887,0.887,0.943,3.189,3.709,3.268,2.909,3.165,3.165,3.067,2.026,1.224,2.498,0.924,2.557,2.872,2.837,3.526,3.063,3.165,2.288,1.375,1.209,1.162,0.954,2.498,2.6,2.333,2.489,2.266,1.898,2.055,2.228,2.498,2.119,1.721,1.149,1.096,0.887,0.887,1.149,1.868,2.07,1.85,1.533,2.534,2.528,1.917,2.094,1.652,3.139,1.0,0.949,2.073,2.498,2.396,2.373,2.674,0.95,0.789,0.824,0.849,0.905,1.459,1.474,1.474,2.66,2.927,3.065,2.814,1.525,0.866,0.789,0.789,0.804,2.002,2.386,2.408,2.508,2.648,2.041,2.648,2.666,1.3,1.183,2.669,2.648,2.523,2.297,1.981,3.257,3.56,2.798,2.932,2.792,2.698,1.696,1.636,2.028,2.497,2.26,2.327,2.497,2.465,2.508,2.006,1.598,1.277,1.0,1.0,1.0,0.773,1.93,2.287,2.271,2.848,2.623,2.285,2.313,1.107,1.236,1.005,1.225,1.749,2.823,3.078,3.474,4.154,4.492,2.798,2.0,2.0,2.432,2.748,2.0,2.186,2.247,1.828,2.898,2.497,3.052,2.588,2.265,1.85,1.024,1.301,1.804,1.672,1.655,1.748,1.909,2.861,2.689,2.313,2.017,1.524,0.897,1.982,1.877,1.779,1.749,2.205,1.764,2.41,2.127,2.044,2.231,1.749,1.276,1.174,1.523,2.596,2.505,2.758,2.905,2.723,2.923,2.756,2.748,2.056,1.749,2.054,1.653,2.056,2.567,2.559,1.821,2.413,2.433,3.276,2.772,1.749,1.713,2.05,2.208,1.636,1.261,2.505,1.523,1.465,1.623,1.624,2.274,1.947,2.101,4.376,1.598,1.634,1.629,2.257,2.73,3.21,3.619,3.023,8.824,8.346,6.051,6.051,25.821,1.966,2.422,2.422,2.648,2.439,2.523,1.533,1.324,1.232,1.149,1.149,1.149,1.148,1.398,1.523,1.523,1.931,1.249,1.334,1.249,1.6,1.399,1.094,1.096,1.224,1.963,1.651,2.011,2.171,2.101,1.877,1.763,1.449,0.875,0.89,1.249,1.324,2.056,2.273,1.754,2.049,1.764,2.262,1.703,1.249,1.156,1.149,1.793,2.573,2.573,2.094,2.366,2.498,2.791,2.493,1.749,1.457,0.987,1.375,1.569,2.498,2.476,2.648,2.379,3.426,4.461,1.936,2.229,1.749,1.624,1.624,1.857,3.928,2.956,2.362,3.393,4.026,3.694,3.121,2.414,1.799,1.773,2.23,2.053,2.063,2.642,2.693,2.658,2.998,2.698,3.374,3.836,3.075,2.0,2.075,4.128,2.548,2.099,1.911,1.839,2.383,2.241,2.548,2.658,1.832,1.749,1.949,1.998,2.446,2.409,2.478,2.523,3.035,2.848,1.999,2.35,1.771,1.616,1.515,2.33,1.941,1.951,1.656,1.749,2.049,1.749,1.36,1.384,1.749,1.542,1.873,2.0,1.112,1.374,1.134,2.326,2.831,2.38,1.71,1.225,0.95,1.08,1.075,1.749,1.749,1.105,1.297,1.24,1.27,1.347,2.174,2.878,2.075,3.403,4.007,2.532,2.624,2.193,3.047,2.174,3.221,2.025,1.754,1.749,1.749,1.749,1.749,1.742]},"volumes":{"SE1":{"n":44.43,"du":31.63,"dd":17.67},"SE2":{"n":36.71,"du":48.31,"dd":63.35},"SE3":{"n":134.84,"du":387.67,"dd":357.2},"SE4":{"n":14.99,"du":79.2,"dd":79.76},"DK2":{"n":6.38,"du":47.58,"dd":55.11}}};
+const rvState={h:2,area:'SE3',prod:'n'};
+const MIXES=REV.scenarios.map(s=>s.mix_id).filter((v,i,a)=>a.indexOf(v)===i);
+const eur=v=>(v<0?'−€':'€')+Math.round(Math.abs(v)).toLocaleString('en-US');
+const eurK=v=>(v<0?'−€':'€')+(Math.abs(v)/1000).toFixed(Math.abs(v)<10000?1:0)+'k';
+const rvA=()=>({spot:{SE1:num('rv-spot1',-500,2000,50),SE2:num('rv-spot2',-500,2000,50),SE3:num('rv-spot3',-500,2000,50)},
+  wear:num('rv-wear',0,500,10),aux:num('rv-aux',0,50,2.5),fee:num('rv-fee',0,100,10)/100,avail:num('rv-avail',0,100,100)/100});
+function rvNet(s,a,area,wearOverride){
+  const spot=a.spot[area],gross=s.gross_EUR*a.avail,hours=s.hours;
+  const energy=spot*(s.import_MWh-s.export_MWh-s.soc_change_MWh);
+  const aux=a.aux*s.energy_MWh/1000*hours*spot;
+  const wear=(wearOverride==null?a.wear:wearOverride)*s.throughput_MWh;
+  const fee=a.fee*gross;
+  return {mix:s.mix,mix_id:s.mix_id,cn:s.c_fcrn_MW,cdu:s.c_fcrd_up_MW,cdd:s.c_fcrd_down_MW,gross,energy,aux,wear,fee,net:gross-energy-aux-wear-fee,thr:s.throughput_MWh};
+}
+function rvRows(){const a=rvA();return REV.scenarios.filter(s=>s.storage_h===rvState.h).map(s=>rvNet(s,a,rvState.area)).sort((x,y)=>y.net-x.net)}
+function rvSeg(sel,attr,val){document.querySelectorAll(sel).forEach(b=>b.setAttribute('aria-pressed',String(b.dataset[attr]===String(val))))}
+function drawRev(){
+  if($('tab-rev').hidden)return;
+  rvSeg('.rv-st','h',rvState.h);rvSeg('.rv-ar','a',rvState.area);rvSeg('.rv-pp','p',rvState.prod);
+  const a=rvA(),rows=rvRows(),best=rows[0];
+  const get=id=>rows.find(r=>r.mix_id===id);
+  const N=get('n_only'),D=get('d_both');
+  $('rv-best-net').textContent=eur(best.net);$('rv-best-name').textContent='Best: '+best.mix+', net';
+  $('rv-n-net').textContent=eur(N.net);$('rv-d-net').textContent=eur(D.net);
+  $('rv-year').textContent=eurK(best.net*12);
+  const n0=rvNet(REV.scenarios.find(s=>s.storage_h===rvState.h&&s.mix_id==='n_only'),a,rvState.area,0).net,d0=rvNet(REV.scenarios.find(s=>s.storage_h===rvState.h&&s.mix_id==='d_both'),a,rvState.area,0).net;
+  const be=(n0-d0)/(N.thr-D.thr);
+  $('rv-be').textContent=be>0?'€'+be.toFixed(0)+'/MWh':'always';
+  const du=[...REV.prices.du].sort((x,y)=>y-x),dsum=REV.prices.du.reduce((s,x)=>s+x,0);
+  $('rv-spike').textContent=Math.round(du.slice(0,6).reduce((s,x)=>s+x,0)/dsum*100)+' %';
+  // bars
+  const bars=$('rv-bars');bars.replaceChildren();
+  const maxG=Math.max(...rows.map(r=>r.gross),1);
+  rows.forEach(r=>{const row=document.createElement('div');row.className='rv-bar';
+    const l=document.createElement('span');l.className='rv-bl';l.textContent=r.mix;
+    const t=document.createElement('div');t.className='rv-track';
+    const g=document.createElement('div');g.className='rv-g';g.style.width=(r.gross/maxG*100)+'%';
+    const nb=document.createElement('div');nb.className='rv-n'+(r.net<0?' neg':'');nb.style.width=(Math.abs(r.net)/maxG*100)+'%';
+    const v=document.createElement('span');v.className='rv-bv';
+    const b=document.createElement('b');b.textContent=eur(r.net);v.append(b,document.createTextNode(' of '+eur(r.gross)));
+    t.append(g,nb);row.append(l,t,v);bars.appendChild(row)});
+  // table
+  const tb=document.querySelector('#rv-table tbody');tb.replaceChildren();
+  rows.forEach((r,i)=>{const tr=document.createElement('tr');if(i===0)tr.className='rv-best';
+    [[r.mix],[r.cn.toFixed(2)],[r.cdu.toFixed(2)],[r.cdd.toFixed(2)],[eur(r.gross)],[eur(r.energy),'c'],[eur(r.aux),'c'],[eur(r.wear),'c'],[eur(r.fee),'c'],[eur(r.net),'n'],[r.thr.toFixed(1)+' MWh']]
+    .forEach(([t,c],j)=>{const td=document.createElement(j?'td':'th');if(!j)td.scope='row';td.textContent=t;if(c==='c')td.className='rv-cost';if(c==='n')td.className='rv-net';tr.appendChild(td)});tb.appendChild(tr)});
+  drawWear(a);drawPrice();drawDay(a);drawAreas();
+}
+function drawWear(a){
+  const box=$('rv-wear-chart');box.replaceChildren();
+  const ids=[['n_only','--fcrn'],['n50_d50','--nem'],['d_both','--fcrd'],['d_up','--trace']];
+  const W=Math.max(280,box.clientWidth),H=240,L0=8,B=26,T=10,R=10;
+  const ser=ids.map(([id,col])=>{const s=REV.scenarios.find(x=>x.storage_h===rvState.h&&x.mix_id===id);
+    return {name:s.mix,col,pts:[0,5,10,15,20,25,30,35,40].map(w=>({w,v:rvNet(s,a,rvState.area,w).net}))}});
+  $('rv-wear-legend').replaceChildren(...ser.map(s=>{const sp=document.createElement('span');const i=document.createElement('i');i.className='ln';i.style.setProperty('--c','var('+s.col+')');sp.append(i,document.createTextNode(s.name));return sp}));
+  const all=ser.flatMap(s=>s.pts.map(p=>p.v));let lo=Math.min(0,...all),hi=Math.max(...all);
+  const raw=Math.max(1,(hi-lo)/5),mag=Math.pow(10,Math.floor(Math.log10(raw))),q=raw/mag;
+  const step=mag*(q<1.5?1:q<3?2:q<7?5:10);
+  const kf=v=>(v<0?'−€':'€')+(Math.abs(v)%1000===0?Math.abs(v)/1000:(Math.abs(v)/1000).toFixed(1))+'k';
+  lo=Math.floor(lo/step)*step;hi=Math.ceil(hi/step)*step;
+  const ticks=[];for(let v=lo;v<=hi+1e-9;v+=step)ticks.push(v);
+  const NS='http://www.w3.org/2000/svg',svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.setAttribute('width','100%');svg.setAttribute('role','img');svg.setAttribute('aria-label','Net revenue against battery wear cost');
+  const mk=(tag,at)=>{const e=document.createElementNS(NS,tag);for(const k in at)e.setAttribute(k,at[k]);svg.appendChild(e);return e};
+  box.appendChild(svg);
+  let L=L0;ticks.forEach(v=>{const t=mk('text',{'font-size':11,x:0,y:0});t.textContent=kf(v);L=Math.max(L,t.getComputedTextLength()+10);t.remove()});
+  const x=w=>L+(W-L-R)*w/40,y=v=>T+(H-T-B)*(1-(v-lo)/(hi-lo||1));
+  ticks.forEach(v=>{mk('line',{x1:L,x2:W-R,y1:y(v),y2:y(v),stroke:css('--line'),'stroke-width':1});const t=mk('text',{x:L-6,y:y(v),dy:'0.32em','text-anchor':'end','font-size':11,fill:css('--muted')});t.textContent=kf(v)});
+  [0,10,20,30,40].forEach(w=>{const t=mk('text',{x:x(w),y:H-6,'text-anchor':w===0?'start':w===40?'end':'middle','font-size':11,fill:css('--muted')});t.textContent='€'+w+'/MWh'});
+  ser.forEach(s=>{mk('polyline',{points:s.pts.map(p=>x(p.w)+','+y(p.v)).join(' '),fill:'none',stroke:css(s.col),'stroke-width':2,'stroke-linejoin':'round','stroke-linecap':'round'});
+    s.pts.forEach(p=>{const c=mk('circle',{cx:x(p.w),cy:y(p.v),r:3,fill:css(s.col)});const tt=document.createElementNS(NS,'title');tt.textContent=s.name+': '+eur(p.v)+' at €'+p.w+'/MWh wear';c.appendChild(tt)})});
+  const cw=a.wear;if(cw>=0&&cw<=40){mk('line',{x1:x(cw),x2:x(cw),y1:T,y2:H-B,stroke:css('--band'),'stroke-dasharray':'4 4'});const t=mk('text',{x:Math.min(x(cw)+4,W-R-60),y:T+10,'font-size':10,fill:css('--muted')});t.textContent='your €'+cw}
+}
+let rvPlot=null;
+function drawPrice(){
+  const box=$('rv-price');if(rvPlot){rvPlot.destroy();rvPlot=null}box.replaceChildren();
+  const key=rvState.prod,col={n:'--fcrn',du:'--fcrd',dd:'--chg'}[key];
+  const ys=REV.prices[key],xs=ys.map((_,i)=>i);
+  const t0=new Date(REV.prices.t0.replace(' ','T')+'Z');
+  const lab=i=>{const d=new Date(t0.getTime()+i*3600e3);return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'UTC'})};
+  const labT=i=>{const d=new Date(t0.getTime()+i*3600e3);return lab(i)+' '+String(d.getUTCHours()).padStart(2,'0')+':00'};
+  const g={stroke:css('--muted'),grid:{stroke:css('--line'),width:1},ticks:{stroke:css('--line'),width:1}};
+  const W=Math.max(280,box.clientWidth);
+  rvPlot=new uPlot({width:W,height:Math.max(200,Math.min(300,Math.round(W*0.3))),scales:{x:{time:false}},legend:{show:false},
+    cursor:{points:{show:false},drag:{x:true,y:false}},
+    axes:[{...g,values:(u,vs)=>vs.map(v=>lab(v)),space:70,incrs:[24,48,72,96,168,336]},{...g,size:52,values:(u,vs)=>vs.map(v=>'€'+v)}],
+    series:[{},{stroke:css(col),width:1.5,points:{show:false}}],
+    hooks:{setCursor:[u=>{const i=u.cursor.idx;$('rv-price-ro').textContent=i==null?'':labT(i)+'  €'+ys[i].toFixed(2)+'/MW'}]}},[xs,ys],box);
+  const ps=$('rv-psum');ps.replaceChildren();
+  [['n','FCR-N'],['du','FCR-D up'],['dd','FCR-D down']].forEach(([k,name])=>{const arr=REV.prices[k],s=arr.reduce((a,b)=>a+b,0),m=[...arr].sort((a,b)=>a-b)[Math.floor(arr.length/2)];
+    const d=document.createElement('div');d.className='stat';const b=document.createElement('b');b.className=k==='n'?'fn':'fd';b.textContent=eur(s);const sp=document.createElement('span');sp.textContent=name+' per MW for the period (median €'+m.toFixed(1)+'/MW·h)';d.append(b,sp);ps.appendChild(d)});
+}
+function drawDay(a){
+  $('rv-day-name').textContent=longDate(curDay);
+  const t0=new Date(REV.prices.t0.replace(' ','T')+'Z'),d=new Date(curDay+'T00:00:00Z');
+  const i0=Math.round((d-t0)/3600e3),len=REV.prices.n.length;
+  const ids=['rv-dg','rv-de','rv-dw','rv-dn'];
+  if(i0<0||i0+24>len){ids.forEach(id=>$(id).textContent='–');$('rv-day-note').textContent='No FCR prices for this day. Prices cover '+REV.period[0]+' to '+REV.period[1]+'. Pick a day in that range on the Simulator tab, or load its Fingrid file.';return}
+  const {CN,CDu,CDd}=caps(),CAP=num('in-e',0.1,400,2),S0=num('in-s0',0,100,50),spot=a.spot[rvState.area];
+  let gross=0;for(let h=i0;h<i0+24;h++)gross+=CN*REV.prices.n[h]+CDu*REV.prices.du[h]+CDd*REV.prices.dd[h];gross*=a.avail;
+  let imp=0,exp=0;for(let i=0;i<n;i++){const v=p[i];if(v>0)exp+=v;else imp-=v}imp*=DT;exp*=DT;
+  const dsoc=(soc[n-1]-S0)/100*CAP;
+  const energy=spot*(imp-exp-dsoc),aux=a.aux*CAP/1000*24*spot,wear=a.wear*(imp+exp),fee=a.fee*gross;
+  $('rv-dg').textContent=eur(gross);$('rv-de').textContent=eur(energy+aux);$('rv-dw').textContent=eur(wear+fee);$('rv-dn').textContent=eur(gross-energy-aux-wear-fee);
+  $('rv-day-note').textContent='Uses the battery ('+num('in-p',0.1,100,1)+' MW / '+CAP+' MWh), capacities (FCR-N '+CN.toFixed(2)+', FCR-D up '+CDu.toFixed(2)+', FCR-D down '+CDd.toFixed(2)+' MW), start SOC and energy management from the Simulator tab, with the costs above at the '+rvState.area+' spot price. One day starting at '+S0+' % SOC, so energy cost includes refilling the battery to where it started.';
+}
+function drawAreas(){
+  const tb=document.querySelector('#rv-areas tbody');tb.replaceChildren();
+  ['SE1','SE2','SE3'].forEach(ar=>{const v=REV.volumes[ar],tr=document.createElement('tr');
+    [ar,v.n.toFixed(1),v.du.toFixed(1),v.dd.toFixed(1)].forEach((t,j)=>{const td=document.createElement(j?'td':'th');if(!j)td.scope='row';td.textContent=t;tr.appendChild(td)});tb.appendChild(tr)});
+}
+document.querySelectorAll('.rv-st').forEach(b=>b.addEventListener('click',()=>{rvState.h=+b.dataset.h;drawRev()}));
+document.querySelectorAll('.rv-ar').forEach(b=>b.addEventListener('click',()=>{rvState.area=b.dataset.a;drawRev()}));
+document.querySelectorAll('.rv-pp').forEach(b=>b.addEventListener('click',()=>{rvState.prod=b.dataset.p;rvSeg('.rv-pp','p',rvState.prod);drawPrice()}));
+let rvT;['rv-spot1','rv-spot2','rv-spot3','rv-wear','rv-aux','rv-fee','rv-avail'].forEach(id=>$(id).addEventListener('input',()=>{clearTimeout(rvT);rvT=setTimeout(drawRev,250)}));
+$('rv-reset').addEventListener('click',()=>{[['rv-spot1',50],['rv-spot2',50],['rv-spot3',50],['rv-wear',10],['rv-aux',2.5],['rv-fee',10],['rv-avail',100]].forEach(([id,v])=>$(id).value=v);drawRev()});
+$('rv-period').textContent=longDate(REV.period[0])+' – '+longDate(REV.period[1]);
+/* ---------- tabs ---------- */
+function showTab(t){const rev=t==='revenue';$('tab-sim').hidden=rev;$('tab-rev').hidden=!rev;
+  $('tb-sim').setAttribute('aria-selected',String(!rev));$('tb-rev').setAttribute('aria-selected',String(rev));
+  $('tb-sim').tabIndex=rev?-1:0;$('tb-rev').tabIndex=rev?0:-1;
+  try{history.replaceState(null,'',rev?'#revenue':'#simulator')}catch(e){}
+  if(rev)drawRev();else build()}
+$('tb-sim').addEventListener('click',()=>showTab('simulator'));
+$('tb-rev').addEventListener('click',()=>showTab('revenue'));
+document.querySelector('.tabs').addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){const rev=$('tab-rev').hidden;showTab(rev?'revenue':'simulator');(rev?$('tb-rev'):$('tb-sim')).focus()}});
+window.addEventListener('resize',()=>{clearTimeout(rvT);rvT=setTimeout(drawRev,200)});
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',drawRev);
+new MutationObserver(drawRev).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
 /* ---------- start ---------- */
 fillDays();fillSc();syncFields();applySplit();compute();fillStart();
-requestAnimationFrame(build);
+requestAnimationFrame(()=>{if(location.hash==='#revenue')showTab('revenue');else build()});
 let t;window.addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(build,150)});
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',build);
 new MutationObserver(build).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});

@@ -10,7 +10,7 @@
   --dis:#c2410c; --chg:#0e6ba8; --trace:#1f3a4d; --freq:#6d28d9; --soc:#047857; --nem:#c0267a; --fcrd:#d97706; --fcrn:#0891b2; --loss:#64748b; --band:#9aa9b3;
   --empty:rgba(194,65,12,.10); --full:rgba(14,107,168,.10); --aem:rgba(192,38,122,.12);
   --zn:rgba(8,145,178,.07); --zd:rgba(217,119,6,.08);
-  --ok:#047857; --warn:#b45309;
+  --ok:#047857; --warn:#b45309; --rv-gross:rgba(100,116,139,.28);
   --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
 }
@@ -18,12 +18,12 @@
   --bg:#0f161b; --panel:#162028; --fg:#e4ebef; --muted:#93a3ad; --line:#26343e;
   --dis:#fb923c; --chg:#5cb8f0; --trace:#cfdde6; --freq:#b79cf7; --soc:#4ade9b; --nem:#f472b6; --fcrd:#fcd34d; --fcrn:#22d3ee; --loss:#94a3b8; --band:#5d6e79;
   --empty:rgba(251,146,60,.14); --full:rgba(92,184,240,.14); --aem:rgba(244,114,182,.16);
-  --zn:rgba(34,211,238,.07); --zd:rgba(252,211,77,.08); --ok:#4ade9b; --warn:#fbbf24; color-scheme:dark}}
+  --zn:rgba(34,211,238,.07); --zd:rgba(252,211,77,.08); --ok:#4ade9b; --warn:#fbbf24; --rv-gross:rgba(148,163,184,.25); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0f161b; --panel:#162028; --fg:#e4ebef; --muted:#93a3ad; --line:#26343e;
   --dis:#fb923c; --chg:#5cb8f0; --trace:#cfdde6; --freq:#b79cf7; --soc:#4ade9b; --nem:#f472b6; --fcrd:#fcd34d; --fcrn:#22d3ee; --loss:#94a3b8; --band:#5d6e79;
   --empty:rgba(251,146,60,.14); --full:rgba(92,184,240,.14); --aem:rgba(244,114,182,.16);
-  --zn:rgba(34,211,238,.07); --zd:rgba(252,211,77,.08); --ok:#4ade9b; --warn:#fbbf24; color-scheme:dark}
+  --zn:rgba(34,211,238,.07); --zd:rgba(252,211,77,.08); --ok:#4ade9b; --warn:#fbbf24; --rv-gross:rgba(148,163,184,.25); color-scheme:dark}
 html,body{background:var(--bg);color:var(--fg)}
 body{font-family:var(--sans);font-size:15px;line-height:1.5;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 32px}
@@ -90,6 +90,40 @@ button:focus-visible,select:focus-visible,.prod input:focus-visible,input[type=r
 .rules{display:grid;gap:6px;max-width:82ch}
 .rules h3{font-size:.95rem;margin:8px 0 0}
 .rules ul{margin:0;padding-left:18px;color:var(--muted);font-size:.88rem;display:grid;gap:3px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-top:-4px}
+.tabs button{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:8px 14px;font:600 .95rem var(--sans);color:var(--muted)}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--trace)}
+#tab-sim,#tab-rev{display:grid;gap:18px}
+[hidden]{display:none!important}
+.rv-h{font-size:1.1rem;font-weight:600;margin:0}
+.rv-intro{display:grid;gap:4px}
+.rv-sample{font:500 .7rem var(--sans);text-transform:none;letter-spacing:0;color:var(--warn);margin-left:8px}
+.rv-bars{display:grid;gap:6px}
+.rv-bar{display:grid;grid-template-columns:minmax(7rem,14rem) 1fr auto;gap:4px 10px;align-items:center;font-size:.82rem}
+@media (max-width:600px){.rv-bar{grid-template-columns:1fr auto}.rv-bar .rv-track{grid-column:1 / -1;grid-row:2}}
+.rv-bl{overflow-wrap:anywhere}
+.rv-track{position:relative;height:1.8rem}
+.rv-g,.rv-n{position:absolute;left:0;border-radius:4px}
+.rv-g{top:0;height:100%;background:var(--rv-gross)}
+.rv-n{top:25%;height:50%;background:var(--fcrn)}
+.rv-n.neg{background:var(--dis)}
+.rv-bv{white-space:nowrap;font:.8rem var(--mono);font-variant-numeric:tabular-nums;color:var(--muted);text-align:right}
+.rv-bv b{color:var(--fg);font-weight:500}
+.rv-tablewrap{overflow-x:auto}
+.rv-table{border-collapse:collapse;width:100%;font:.8rem var(--mono);font-variant-numeric:tabular-nums}
+.rv-table th,.rv-table td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.rv-table th:first-child{text-align:left;font-family:var(--sans);font-weight:500;white-space:normal;min-width:9rem}
+.rv-table thead th{color:var(--muted);font:500 .72rem var(--sans);text-transform:uppercase;letter-spacing:.05em}
+.rv-table td.rv-cost{color:var(--muted)} .rv-table td.rv-net{font-weight:600}
+.rv-table tr.rv-best>*{background:color-mix(in srgb,var(--fcrn) 10%,transparent)}
+.rv-chart,#rv-price{min-height:240px;width:100%;justify-self:stretch}
+.rv-chart svg{display:block;width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.8rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:14px;height:10px;border-radius:2px;background:var(--c)}
+.legend i.ln{height:3px}
+.rv-stats{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+.rules a{color:var(--chg)}
 .note{font-size:.82rem;color:var(--muted);max-width:82ch;margin:0}
 .note a,.hint a{color:var(--chg)}
 #loading{font-family:var(--mono);color:var(--muted);padding:40px 0;text-align:center}
@@ -99,6 +133,11 @@ button:focus-visible,select:focus-visible,.prod input:focus-visible,input[type=r
     <h1>Battery on FCR&#8209;N and FCR&#8209;D, <span id="day-long">__DATE_LONG__</span></h1>
     <p class="sub">Every 0.1 s sample, 864,000 points a day, with Nordic LER energy management (NEM and AEM). Load your own Fingrid days, run FCR-N, FCR-D or both, split battery power between them, and export the results. Positive power is <span class="dis">discharging</span>, negative is <span class="chg">charging</span>.</p>
   </header>
+  <nav class="tabs" role="tablist" aria-label="Views">
+    <button role="tab" id="tb-sim" aria-selected="true" aria-controls="tab-sim">Simulator</button>
+    <button role="tab" id="tb-rev" aria-selected="false" aria-controls="tab-rev" tabindex="-1">Revenue</button>
+  </nav>
+  <div id="tab-sim" role="tabpanel" aria-labelledby="tb-sim">
 
   <section class="panel" aria-label="Data, scenarios and export">
     <div class="row">
@@ -253,6 +292,8 @@ button:focus-visible,select:focus-visible,.prod input:focus-visible,input[type=r
     </ul>
   </section>
   <p class="note">Sources: ENTSO-E, <a href="https://www.statnett.no/link/fe89e089e1fd4154947ca28e6ea8c3fc.aspx" target="_blank" rel="noopener">Technical Requirements for FCR Provision in the Nordic Synchronous Area v1.1</a> (28 Mar 2025), section 3.5 and Table 10; Energinet, <a href="https://en.energinet.dk/media/r4rbirq2/prequalfication-of-fcr-n-and-fcr-d.pdf" target="_blank" rel="noopener">Prequalification of FCR-N and FCR-D</a> (NEM and AEM thresholds, power shares and energy reservations). Frequency: Fingrid 0.1 s data, times as given in the file (built-in day: <span id="day-iso">__DATE_ISO__</span>). Values outside 49–51 Hz and single-sample spikes are removed and gaps filled with the previous value. SOC is limited to 0–100 %, and losses are split evenly between charging and discharging. Hourly bid changes are not modelled.</p>
+  </div>
+<!--REV_HTML-->
 </main>
 <script src="https://cdn.jsdelivr.net/npm/uplot@1.6.30/dist/uPlot.iife.min.js"></script>
 <script>
@@ -586,9 +627,10 @@ $('ex-csv').addEventListener('click',async()=>{say('Preparing CSV…');await new
   await saveFile('fcr-sim_'+tag()+'_'+(R===1?'0.1s':'1s')+'.csv',new Blob(parts,{type:'text/csv'}))});
 $('ex-json').addEventListener('click',()=>{const out={generated:new Date().toISOString(),model:'FCR battery simulator (static FCR-N/FCR-D, Nordic NEM/AEM)',day:curDay,settings:getSettings(),results:stats};
   saveFile('fcr-sim_'+tag()+'_summary.json',JSON.stringify(out,null,2))});
+/*REV_JS*/
 /* ---------- start ---------- */
 fillDays();fillSc();syncFields();applySplit();compute();fillStart();
-requestAnimationFrame(build);
+requestAnimationFrame(()=>{if(location.hash==='#revenue')showTab('revenue');else build()});
 let t;window.addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(build,150)});
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',build);
 new MutationObserver(build).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});

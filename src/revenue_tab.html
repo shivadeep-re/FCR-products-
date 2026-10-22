@@ -1,0 +1,108 @@
+  <div id="tab-rev" role="tabpanel" aria-labelledby="tb-rev" hidden>
+    <section class="panel" aria-label="Revenue setup">
+      <div class="rv-intro">
+        <h2 class="rv-h">Revenue, <span id="rv-period">August 2026</span></h2>
+        <p class="hint">Gross capacity revenue = bid MW × hourly FCR price (Svenska kraftnät Mimer) × hours available. Net subtracts energy at spot, auxiliary power, battery wear and an aggregator fee. Battery operation comes from the same 0.1 s model as the Simulator tab, run over the whole month with NEM and AEM on and SOC carried day to day. FCR prices are the same in SE1, SE2 and SE3.</p>
+      </div>
+      <div class="row">
+        <div class="controls" role="group" aria-label="Battery storage"><span class="lab">1 MW battery with</span>
+          <button class="seg rv-st" data-h="1" aria-pressed="false">1 h</button>
+          <button class="seg rv-st" data-h="1.5" aria-pressed="false">1.5 h</button>
+          <button class="seg rv-st" data-h="2" aria-pressed="true">2 h</button>
+          <button class="seg rv-st" data-h="3" aria-pressed="false">3 h</button></div>
+        <div class="controls" role="group" aria-label="Bidding area"><span class="lab">Area</span>
+          <button class="seg rv-ar" data-a="SE1" aria-pressed="false">SE1</button>
+          <button class="seg rv-ar" data-a="SE2" aria-pressed="false">SE2</button>
+          <button class="seg rv-ar" data-a="SE3" aria-pressed="true">SE3</button></div>
+      </div>
+      <div class="grp">
+        <h2 class="t">Cost assumptions <span class="rv-sample">sample values, change them</span></h2>
+        <div class="row">
+          <div class="fld"><label for="rv-spot1">Spot SE1</label><div class="in"><input id="rv-spot1" type="number" inputmode="decimal" min="-500" max="2000" step="1" value="50"><span class="u">€/MWh</span></div></div>
+          <div class="fld"><label for="rv-spot2">Spot SE2</label><div class="in"><input id="rv-spot2" type="number" inputmode="decimal" min="-500" max="2000" step="1" value="50"><span class="u">€/MWh</span></div></div>
+          <div class="fld"><label for="rv-spot3">Spot SE3</label><div class="in"><input id="rv-spot3" type="number" inputmode="decimal" min="-500" max="2000" step="1" value="50"><span class="u">€/MWh</span></div></div>
+          <div class="fld"><label for="rv-wear">Battery wear</label><div class="in"><input id="rv-wear" type="number" inputmode="decimal" min="0" max="500" step="1" value="10"><span class="u">€/MWh</span></div></div>
+          <div class="fld"><label for="rv-aux">Aux power</label><div class="in"><input id="rv-aux" type="number" inputmode="decimal" min="0" max="50" step="0.5" value="2.5"><span class="u">kW/MWh</span></div></div>
+          <div class="fld"><label for="rv-fee">Aggregator fee</label><div class="in"><input id="rv-fee" type="number" inputmode="decimal" min="0" max="100" step="1" value="10"><span class="u">%</span></div></div>
+          <div class="fld"><label for="rv-avail">Availability</label><div class="in"><input id="rv-avail" type="number" inputmode="decimal" min="0" max="100" step="1" value="100"><span class="u">%</span></div></div>
+          <button id="rv-reset">Reset</button>
+        </div>
+        <span class="hint">Wear is the battery's replacement cost spread over the energy it can cycle in its life. Aux power is cooling and controls per MWh installed, bought at spot. Availability below 100 % removes that share of gross revenue (maintenance, tests, trips).</span>
+      </div>
+    </section>
+
+    <div class="stats rv-stats">
+      <div class="stat"><b id="rv-best-net"></b><span id="rv-best-name">Best mix, net</span></div>
+      <div class="stat"><b class="fn" id="rv-n-net"></b><span>FCR-N only, net</span></div>
+      <div class="stat"><b class="fd" id="rv-d-net"></b><span>FCR-D up + down, net</span></div>
+      <div class="stat"><b id="rv-year"></b><span>Best mix, net per year if every month were like this</span></div>
+      <div class="stat"><b class="nm" id="rv-be"></b><span>Wear cost where FCR-D up + down beats FCR-N only</span></div>
+      <div class="stat"><b class="fd" id="rv-spike"></b><span>FCR-D up revenue from its 6 best hours</span></div>
+    </div>
+
+    <section class="panel" aria-labelledby="rv-bars-h">
+      <h2 class="t" id="rv-bars-h">Gross and net revenue by product mix, 1–30 August</h2>
+      <div class="legend"><span><i style="--c:var(--rv-gross)"></i>Gross</span><span><i style="--c:var(--fcrn)"></i>Net</span><span><i style="--c:var(--dis)"></i>Net below zero</span></div>
+      <div class="rv-bars" id="rv-bars"></div>
+      <div class="rv-tablewrap">
+        <table class="rv-table" id="rv-table">
+          <thead><tr><th scope="col">Mix</th><th scope="col">FCR-N MW</th><th scope="col">FCR-D up MW</th><th scope="col">FCR-D down MW</th><th scope="col">Gross</th><th scope="col">Energy</th><th scope="col">Aux</th><th scope="col">Wear</th><th scope="col">Fee</th><th scope="col">Net</th><th scope="col">Throughput</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="hint">Capacities are the most each mix can bid on this battery under the sizing rules on the Simulator tab. No mix entered AEM or ran empty in August, so it was available every hour unless you lower Availability.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="rv-wear-h">
+      <h2 class="t" id="rv-wear-h">How battery wear cost changes the winner</h2>
+      <div class="legend" id="rv-wear-legend"></div>
+      <div class="rv-chart" id="rv-wear-chart"></div>
+      <p class="hint">FCR-N cycles the battery about 1 time a day on a 2 h battery, FCR-D almost never. The more each MWh of cycling costs, the better FCR-D looks.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="rv-day-h">
+      <h2 class="t" id="rv-day-h">Your Simulator setup on <span id="rv-day-name">this day</span></h2>
+      <div class="stats" id="rv-day-stats">
+        <div class="stat"><b id="rv-dg"></b><span>Gross</span></div>
+        <div class="stat"><b id="rv-de"></b><span>Energy + aux</span></div>
+        <div class="stat"><b id="rv-dw"></b><span>Wear + fee</span></div>
+        <div class="stat"><b id="rv-dn"></b><span>Net for the day</span></div>
+      </div>
+      <p class="hint" id="rv-day-note">Uses the battery, capacities, day and energy management from the Simulator tab, with the costs above and the spot price of the selected area.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="rv-price-h">
+      <h2 class="t" id="rv-price-h">FCR prices, €/MW per hour</h2>
+      <div class="controls" role="group" aria-label="Product">
+        <button class="seg rv-pp" data-p="n" aria-pressed="true">FCR-N</button>
+        <button class="seg rv-pp" data-p="du" aria-pressed="false">FCR-D up</button>
+        <button class="seg rv-pp" data-p="dd" aria-pressed="false">FCR-D down</button>
+        <span class="readout" id="rv-price-ro"></span>
+      </div>
+      <div id="rv-price"></div>
+      <div class="stats" id="rv-psum"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="rv-area-h">
+      <h2 class="t" id="rv-area-h">Market size by area, average contracted MW</h2>
+      <div class="rv-tablewrap"><table class="rv-table" id="rv-areas"><thead><tr><th scope="col">Area</th><th scope="col">FCR-N</th><th scope="col">FCR-D up</th><th scope="col">FCR-D down</th></tr></thead><tbody></tbody></table></div>
+      <p class="hint">The price is the same everywhere, but a 1 MW battery is a much bigger share of SE1 and SE2 than of SE3, so its bids are more likely to move the price there.</p>
+    </section>
+
+    <section class="rules" aria-labelledby="rv-bench-h">
+      <h3 id="rv-bench-h">Is this realistic? Market benchmarks</h3>
+      <ul>
+        <li>Clean Horizon's index for a 2-hour battery in Sweden: <b>€164k/MW/year</b> in June 2026 and <b>€126k/MW/year</b> in July 2026 (−20% after FCR and mFRR capacity prices fell about 30%). That is about €10–14k per MW per month, optimised across FCR, mFRR and spot trading. <a href="https://www.cleanhorizon.com/news/storage-index-july-2026/" target="_blank" rel="noopener">Clean Horizon</a>, <a href="https://www.ess-news.com/2026/08/12/european-bess-revenues-mostly-rise-in-june-with-italy-still-a-standout/" target="_blank" rel="noopener">ESS News</a></li>
+        <li>Montel (2025): a 1 MW / 2 MWh battery in Sweden can earn about <b>€100k/MW/year</b>. <a href="https://montel.energy/resources/blog/battery-storage-market-insights-sweden" target="_blank" rel="noopener">Montel</a></li>
+        <li>Svenska kraftnät reported an average FCR-N price of <b>€29.9/MW</b> per hour for October 2025, with August and September 2025 at similar levels. <a href="https://www.svk.se/4acc2a/siteassets/aktorsportalen/bidra-med-reserver/handel-och-prissattning/marknadsanalys-balanstjanster/manadsrapport-fcr-oktober-2025.pdf" target="_blank" rel="noopener">Svenska kraftnät</a></li>
+        <li>FCR-D prices collapsed in 2024 as prequalified battery capacity (about 600 MW) overtook demand (below 550 MW). <a href="https://montel.energy/resources/blog/battery-storage-market-insights-sweden" target="_blank" rel="noopener">Montel</a>, <a href="https://www.flower.se/insights/market-insight/the-fcr-d-price-is-at-record-lows-now-what/" target="_blank" rel="noopener">Flower</a></li>
+      </ul>
+      <h3>What this model leaves out</h3>
+      <ul>
+        <li>It assumes every bid is accepted at the hourly price and that the battery does not move the price itself.</li>
+        <li>Grid fees on the auxiliary supply, insurance, O&amp;M, delivery penalties and capital costs are not included, so net is an operating margin, not profit.</li>
+        <li>Energy activated for FCR is valued at spot; the actual settlement may use imbalance prices.</li>
+        <li>One month of prices: summer months are usually lower than winter, and prices swing a lot from month to month.</li>
+      </ul>
+    </section>
+  </div>
