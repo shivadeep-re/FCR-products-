@@ -131,7 +131,7 @@ button:focus-visible,select:focus-visible,.prod input:focus-visible,input[type=r
 <main>
   <header>
     <h1>Battery on FCR&#8209;N and FCR&#8209;D, <span id="day-long">__DATE_LONG__</span></h1>
-    <p class="sub">Every 0.1 s sample, 864,000 points a day, with Nordic LER energy management (NEM and AEM). Load your own Fingrid days, run FCR-N, FCR-D or both, split battery power between them, and export the results. Positive power is <span class="dis">discharging</span>, negative is <span class="chg">charging</span>.</p>
+    <p class="sub">Every 0.1 s sample, 864&#8239;000 points a day, with Nordic LER energy management (NEM and AEM). Load your own Fingrid days, run FCR-N, FCR-D or both, split battery power between them, and export the results. Positive power is <span class="dis">discharging</span>, negative is <span class="chg">charging</span>.</p>
   </header>
   <nav class="tabs" role="tablist" aria-label="Views">
     <button role="tab" id="tb-sim" aria-selected="true" aria-controls="tab-sim">Simulator</button>
@@ -162,8 +162,8 @@ button:focus-visible,select:focus-visible,.prod input:focus-visible,input[type=r
       <h2 class="t">Export</h2>
       <div class="row">
         <div class="controls"><span class="lab">Resolution</span>
-          <button class="seg" data-res="10" aria-pressed="true">1 s (86,400 rows)</button>
-          <button class="seg" data-res="1" aria-pressed="false">0.1 s (864,000 rows)</button></div>
+          <button class="seg" data-res="10" aria-pressed="true">1 s (86&#8239;400 rows)</button>
+          <button class="seg" data-res="1" aria-pressed="false">0.1 s (864&#8239;000 rows)</button></div>
         <button class="pri" id="ex-csv">Export results (.csv)</button>
         <button id="ex-json">Export summary + settings (.json)</button>
       </div>
@@ -256,7 +256,7 @@ button:focus-visible,select:focus-visible,.prod input:focus-visible,input[type=r
         <button class="tog sm" data-s="p:2" aria-pressed="true" style="--c:var(--fcrn)"><i></i>FCR-N</button>
         <button class="tog sm" data-s="p:3" aria-pressed="true" style="--c:var(--fcrd)"><i></i>FCR-D</button>
         <button class="tog sm" data-s="p:4" aria-pressed="true" style="--c:var(--nem)"><i></i>NEM</button></div>
-        <div id="c-p"><div id="loading">Decoding 864,000 samples…</div></div></div>
+        <div id="c-p"><div id="loading">Decoding 864&#8239;000 samples…</div></div></div>
       <div class="ch" id="w-f"><div class="hd"><h2>Frequency, Hz</h2>
         <button class="tog sm" id="frange" aria-pressed="false" style="--c:var(--fcrd)"><i class="box"></i>Full FCR-D range</button></div>
         <div id="c-f"></div></div>
@@ -327,7 +327,7 @@ function parseFingrid(text){
     const k=(hh*3600+mm*60+ss)*10+Math.round(ms/100);if(k<0||k>=n)continue;
     idx.push(k);val.push(v);}
   if(!date||!/^\d{4}-\d{2}-\d{2}$/.test(date))throw new Error('no Fingrid rows found (expected "Time,Value" with 0.1 s timestamps)');
-  if(idx.length<n*0.5)throw new Error('only '+idx.length.toLocaleString()+' valid samples, too much data missing');
+  if(idx.length<n*0.5)throw new Error('only '+String(idx.length).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f')+' valid samples, too much data missing');
   // drop single-sample spikes: > 50 mHz from a centred 9-sample median
   const m=idx.length,keep=new Uint8Array(m),w=new Float64Array(9);
   for(let i=0;i<m;i++){const a=Math.max(0,i-4),b=Math.min(m-1,i+4);let c2=0;

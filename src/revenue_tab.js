@@ -2,7 +2,8 @@
 const REV=__REV_DATA__;
 const rvState={h:2,area:'SE3',prod:'n'};
 const MIXES=REV.scenarios.map(s=>s.mix_id).filter((v,i,a)=>a.indexOf(v)===i);
-const eur=v=>(v<0?'−€':'€')+Math.round(Math.abs(v)).toLocaleString('en-US');
+const grp=x=>String(x).replace(/\B(?=(\d{3})+(?!\d))/g,'\u202f');
+const eur=v=>(v<0?'−€':'€')+grp(Math.round(Math.abs(v)));
 const eurK=v=>(v<0?'−€':'€')+(Math.abs(v)/1000).toFixed(Math.abs(v)<10000?1:0)+'k';
 const rvA=()=>({spot:{SE1:num('rv-spot1',-500,2000,50),SE2:num('rv-spot2',-500,2000,50),SE3:num('rv-spot3',-500,2000,50)},
   wear:num('rv-wear',0,500,10),aux:num('rv-aux',0,50,2.5),fee:num('rv-fee',0,100,10)/100,avail:num('rv-avail',0,100,100)/100});
